@@ -1,0 +1,15 @@
+Registro: 3000100n
+Cabeçalho: https://physionet.org/files/mimic3wdb/1.0/30/3000100/3000100n.hea
+Canais: ['ectopic count', 'ectopic status', 'hr', 'nbp dias', 'nbp mean', 'nbp sys', 'pulse', 'pvc rate per minute', 'resp', 'rhythm status', 'spo2', 'st iii', 'st v']
+
+Registro: 3000086n
+Cabeçalho: https://physionet.org/files/mimic3wdb/1.0/30/3000086/3000086n.hea
+Canais: ['ectopic status', 'hr', 'nbp dias', 'nbp mean', 'nbp sys', 'pulse', 'pvc rate per minute', 'resp', 'rhythm status', 'spo2', 'st iii', 'st v']
+
+Registro: 3000190n
+Cabeçalho: https://physionet.org/files/mimic3wdb/1.0/30/3000190/3000190n.hea
+Canais: ['ectopic count', 'ectopic status', 'hr', 'nbp dias', 'nbp mean', 'nbp sys', 'pulse', 'pvc rate per minute', 'resp', 'rhythm status', 'spo2', 'st iii', 'st v']
+
+Registro: 3000203n
+Cabeçalho: https://physionet.org/files/mimic3wdb/1.0/30/3000203/3000203n.hea
+Canais: ['ectopic count', 'ectopic status', 'hr', 'nbp', 'nbp dias', 'nbp mean', 'nbp sys', 'pulse', 'pvcrate per minute', 'resp', 'rhythm status', 'spo2', 'st iii', 'st v']
