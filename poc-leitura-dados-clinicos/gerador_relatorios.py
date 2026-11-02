@@ -94,6 +94,58 @@ class GeradorRelatorios:
                 return self.colunas_normalizadas[alias]
         return None
 
+    def _obter_tempo_analisado(self) -> dict[str, Any]:
+        coluna_tempo = self._encontrar_coluna({"tempo_segundos"})
+        if coluna_tempo is None:
+            return {
+                "duracao_segundos": None,
+                "duracao_formatada": None,
+                "observacao": "O CSV não contém a coluna tempo_segundos.",
+            }
+
+        tempos = pd.to_numeric(self.df[coluna_tempo], errors="coerce").dropna()
+        if tempos.empty:
+            return {
+                "duracao_segundos": None,
+                "duracao_formatada": None,
+                "observacao": "A coluna tempo_segundos não contém valores válidos.",
+            }
+
+        inicio = float(tempos.min())
+        fim = float(tempos.max())
+        intervalos = tempos.sort_values().diff()
+        intervalos_validos = intervalos[intervalos > 0]
+        if intervalos_validos.empty:
+            return {
+                "inicio_segundo": inicio,
+                "fim_ultimo_sample_segundo": fim,
+                "duracao_segundos": None,
+                "duracao_formatada": None,
+                "observacao": "Não foi possível inferir o intervalo de amostragem.",
+            }
+
+        intervalo_amostragem = float(intervalos_validos.median())
+        duracao = fim - inicio + intervalo_amostragem
+        minutos, segundos = divmod(round(duracao), 60)
+        if minutos and segundos:
+            formatada = f"{minutos} minuto(s) e {segundos} segundo(s)"
+        elif minutos:
+            formatada = f"{minutos} minuto(s)"
+        else:
+            formatada = f"{segundos} segundo(s)"
+
+        return {
+            "inicio_segundo": inicio,
+            "fim_ultimo_sample_segundo": fim,
+            "duracao_segundos": round(duracao, 2),
+            "duracao_formatada": formatada,
+            "intervalo_amostragem_segundos": round(intervalo_amostragem, 6),
+            "observacao": (
+                "Duração calculada pelo intervalo entre o primeiro e o último "
+                "registro, acrescido de um intervalo de amostragem."
+            ),
+        }
+
     def _avaliar_canal(self, canal: str) -> dict[str, Any]:
         configuracao = self.CANAIS[canal]
         coluna = self._encontrar_coluna(configuracao["aliases"])
@@ -206,6 +258,7 @@ class GeradorRelatorios:
             },
             "prontuario": self.paciente.get("prontuario")
             or "Não informado no cadastro.",
+            "tempo_analisado": self._obter_tempo_analisado(),
             "sinais_vitais": {
                 "HR": self.avaliar_hr(),
                 "SpO2": self.avaliar_spo2(),

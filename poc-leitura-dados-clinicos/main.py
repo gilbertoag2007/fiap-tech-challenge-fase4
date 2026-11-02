@@ -69,6 +69,9 @@ def gerar_graficos_sinais_vitais(df, paciente, diretorio_saida):
     ]
 
     for nome_canal, canal in canais:
+        if not df[canal].notna().any():
+            continue
+
         plt.figure(figsize=(12, 3))
 
         plt.plot(

@@ -1,0 +1,105 @@
+{
+  "dados_do_paciente": {
+    "id": "3141595n",
+    "nome": "Juliana Oliveira",
+    "idade": 45,
+    "sexo": "Feminino",
+    "data": "2026-11-02T15:11:54-03:00"
+  },
+  "prontuario": "paciente com histórico de hipertensão. Faz uso diário de Captopril",
+  "tempo_analisado": {
+    "inicio_segundo": 0.0,
+    "fim_ultimo_sample_segundo": 599.0,
+    "duracao_segundos": 600.0,
+    "duracao_formatada": "10 minuto(s)",
+    "intervalo_amostragem_segundos": 1.0,
+    "observacao": "Duração calculada pelo intervalo entre o primeiro e o último registro, acrescido de um intervalo de amostragem."
+  },
+  "sinais_vitais": {
+    "HR": {
+      "descricao": "Frequência cardíaca",
+      "coluna_csv": "HR",
+      "unidade": "bpm",
+      "referencia_adulto": "60 a 100 bpm em adultos em repouso.",
+      "fonte": "https://medlineplus.gov/ency/article/003399.htm",
+      "estatisticas": {
+        "quantidade": 600,
+        "minimo": 137.0,
+        "maximo": 158.0,
+        "media": 149.98,
+        "mediana": 150.0
+      },
+      "status": "Alterada",
+      "observacao": "600 de 600 valores (100.0%) ficaram fora da faixa de referência informada. Isso é uma sinalização automatizada, não um diagnóstico."
+    },
+    "SpO2": {
+      "descricao": "Saturação de oxigênio",
+      "coluna_csv": "SpO2",
+      "unidade": "%",
+      "referencia_adulto": "95% a 100% como faixa usual; pode variar em doenças pulmonares ou altitude elevada.",
+      "fonte": "https://medlineplus.gov/lab-tests/pulse-oximetry/",
+      "estatisticas": {
+        "quantidade": 600,
+        "minimo": 93.0,
+        "maximo": 97.0,
+        "media": 94.74,
+        "mediana": 95.0
+      },
+      "status": "Alterada",
+      "observacao": "290 de 600 valores (48.3%) ficaram fora da faixa de referência informada. Isso é uma sinalização automatizada, não um diagnóstico."
+    },
+    "NBPs": {
+      "descricao": "Pressão arterial sistólica",
+      "coluna_csv": "NBP Sys",
+      "unidade": "mmHg",
+      "referencia_adulto": "90 a menos de 120 mmHg; a classificação da pressão arterial deve considerar também a medida diastólica.",
+      "fonte": "https://my.clevelandclinic.org/health/articles/10881-vital-signs",
+      "status": "Não disponível",
+      "estatisticas": null,
+      "observacao": "O canal está no CSV, mas não possui valores numéricos disponíveis."
+    },
+    "NBPd": {
+      "descricao": "Pressão arterial diastólica",
+      "coluna_csv": "NBP Dias",
+      "unidade": "mmHg",
+      "referencia_adulto": "60 a menos de 80 mmHg; a classificação da pressão arterial deve considerar também a medida sistólica.",
+      "fonte": "https://my.clevelandclinic.org/health/articles/10881-vital-signs",
+      "status": "Não disponível",
+      "estatisticas": null,
+      "observacao": "O canal está no CSV, mas não possui valores numéricos disponíveis."
+    },
+    "PULSE": {
+      "descricao": "Frequência de pulso periférico",
+      "coluna_csv": "PULSE",
+      "unidade": "bpm",
+      "referencia_adulto": "60 a 100 bpm em adultos em repouso.",
+      "fonte": "https://medlineplus.gov/ency/article/003399.htm",
+      "estatisticas": {
+        "quantidade": 600,
+        "minimo": 144.0,
+        "maximo": 156.0,
+        "media": 149.53,
+        "mediana": 150.0
+      },
+      "status": "Alterada",
+      "observacao": "600 de 600 valores (100.0%) ficaram fora da faixa de referência informada. Isso é uma sinalização automatizada, não um diagnóstico."
+    },
+    "RESP": {
+      "descricao": "Frequência respiratória",
+      "coluna_csv": "RESP",
+      "unidade": "rpm",
+      "referencia_adulto": "12 a 18 respirações por minuto em adultos.",
+      "fonte": "https://my.clevelandclinic.org/health/articles/10881-vital-signs",
+      "estatisticas": {
+        "quantidade": 600,
+        "minimo": 27.0,
+        "maximo": 85.0,
+        "media": 57.93,
+        "mediana": 57.0
+      },
+      "status": "Alterada",
+      "observacao": "600 de 600 valores (100.0%) ficaram fora da faixa de referência informada. Isso é uma sinalização automatizada, não um diagnóstico."
+    }
+  },
+  "criterio_de_interpretacao": "Foram comparados os valores numéricos disponíveis com faixas gerais para adultos. A classificação considera Alterada se ao menos uma amostra estiver fora da faixa; sexo, repouso, condições clínicas, altitude e contexto de medição não foram usados para personalizar os limites. O resultado não é diagnóstico."
+}
