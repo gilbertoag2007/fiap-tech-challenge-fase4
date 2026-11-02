@@ -1,0 +1,29 @@
+{
+  "paciente_1": {
+    "id": "3000190n",
+    "nome": "Carlos Alberto Lima",
+    "idade": 55,
+    "genero": "Masculino",
+    "prontuario": "paciente com histórico de hipertensão e diabetes. Faz uso diário de Glifage e ARA II",
+    "diretorio": "mimic3wdb/1.0/30/3000190",
+    "link": "https://physionet.org/files/mimic3wdb/1.0/30/3000190/3000190n.hea"
+  },
+  "paciente_2": {
+    "id": "3000086n",
+    "nome": "Leticia Freitas",
+    "idade": 18,
+    "genero": "Feminino",
+    "prontuario": "paciente com histórico de asma. Faz uso diário de Salbutamol",
+    "diretorio": "mimic3wdb/1.0/30/3000086",
+    "link": "https://physionet.org/files/mimic3wdb/1.0/30/3000086/3000086n.hea"
+  },
+  "paciente_3": {
+    "id": "3141595n",
+    "nome": "Juliana Oliveira",
+    "idade": 45,
+    "genero": "Feminino",
+    "prontuario": "paciente com histórico de hipertensão. Faz uso diário de Captopril",
+    "diretorio": "mimic3wdb/1.0/31/3141595",
+    "link": "https://physionet.org/files/mimic3wdb/1.0/31/3141595/3141595n.hea"
+  }
+}
