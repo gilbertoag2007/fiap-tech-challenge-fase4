@@ -1,23 +1,38 @@
 from email import header
+from datetime import datetime
+from pathlib import Path
 
 import wfdb
 import pandas as pd
 
 
-def gerar_dataframe_dados_clinicos(registro, diretorio):
+def gerar_nome_arquivo_sinais_vitais(paciente):
+    nome = paciente["nome"].upper().replace(" ", "_")
+    data_hora = datetime.now().strftime("%Y%m%d_%H%M")
+    return f"SINAIS_VITAIS_{paciente['id']}_{nome}_{data_hora}"
+
+
+def gerar_diretorio_saida(paciente):
+    nome_paciente = paciente["nome"].upper().replace(" ", "_")
+    data_hora = datetime.now().strftime("%Y%m%d_%H%M%S")
+    diretorio_dados = Path(__file__).resolve().parent / "data"
+    return diretorio_dados / nome_paciente / data_hora
+
+
+def gerar_dataframe_dados_clinicos(paciente, diretorio_saida=None):
 
 
 
     # Primeiro, consultar apenas o cabeçalho
-    header = wfdb.rdheader(registro,pn_dir=diretorio)
+    header = wfdb.rdheader(paciente["id"],pn_dir=paciente["diretorio"])
 
     print("Frequência:", header.fs)
     print("Sinais disponíveis:", header.sig_name)
 
     # Ler apenas os primeiros 600 segundos
     dados = wfdb.rdrecord(
-        registro,
-        pn_dir=diretorio,
+        paciente["id"],
+        pn_dir=paciente["diretorio"],
         sampfrom=0,
         sampto=600 #600 segundos de dados
     )
@@ -37,10 +52,12 @@ def gerar_dataframe_dados_clinicos(registro, diretorio):
     print(df.head())
 
     # Salvar localmente em CSV
-    df.to_csv(
-        "sinais_vitais_mimic3.csv",
-        index=False
-    )
+    if diretorio_saida is None:
+        diretorio_saida = gerar_diretorio_saida(paciente)
+    diretorio_saida = Path(diretorio_saida)
+    diretorio_saida.mkdir(parents=True, exist_ok=True)
+    nome_arquivo = gerar_nome_arquivo_sinais_vitais(paciente)
+    df.to_csv(diretorio_saida / f"{nome_arquivo}.csv", index=False)
 
     print("Arquivo CSV gerado com sucesso!")
 

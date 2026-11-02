@@ -1,28 +1,74 @@
 
+from pathlib import Path
+
 import downloader as dw
 import matplotlib.pyplot as plt
+from gerador_relatorios import GeradorRelatorios
 
-# Registro documentado pelo PhysioNet https://physionet.org/content/mimic3wdb/1.0/31/3141595/
-registro = "3141595n" # paciente
-diretorio = "mimic3wdb/1.0/31/3141595"
+paciente_1 = {
+"id": "3000190n",
+"nome": "Carlos Alberto Lima",
+"idade": 55,
+"genero": "Masculino",
+"prontuario": "paciente com histórico de hipertensão e diabetes. Faz uso diário de Glifage e ARA II",
+"diretorio": "mimic3wdb/1.0/30/3000190",
+"link": "https://physionet.org/files/mimic3wdb/1.0/30/3000190/3000190n.hea"
+}
 
-df = dw.gerar_dataframe_dados_clinicos(diretorio=diretorio, registro=registro)
+paciente_2 = {
+"id": "3000086n",
+"nome": "Leticia Freitas",
+"idade": 18,
+"genero": "Feminino",
+"prontuario": "paciente com histórico de asma. Faz uso diário de Salbutamol",
+"diretorio": "mimic3wdb/1.0/30/3000086",
+"link": "https://physionet.org/files/mimic3wdb/1.0/30/3000086/3000086n.hea"
+}
 
-def gerar_graficos_sinais_vitais(df):
-    # VISUALIZANDO OS DADOS EM GRÁFICOS
-    # Selecionar canais disponíveis
+paciente_3 = {
+"id": "3141595n",
+"nome": "Juliana Oliveira",
+"idade": 45,
+"genero": "Feminino",
+"prontuario": "paciente com histórico de hipertensão. Faz uso diário de Captopril",
+"diretorio": "mimic3wdb/1.0/31/3141595",
+"link": "https://physionet.org/files/mimic3wdb/1.0/31/3141595/3141595n.hea"
+}
+
+#df = dw.gerar_dataframe_dados_clinicos(diretorio=diretorio, registro=registro)
+diretorio_saida = dw.gerar_diretorio_saida(paciente_3)
+df = dw.gerar_dataframe_dados_clinicos(paciente_3, diretorio_saida)
+
+print(colunas := df.columns)
+
+
+def gerar_graficos_sinais_vitais(df, paciente, diretorio_saida):
+    aliases_canais = {
+        "HR": {"hr"},
+        "SpO2": {"spo2"},
+        "NBPs": {"nbps", "nbpsys"},
+        "NBPd": {"nbpd", "nbpdias"},
+        "PULSE": {"pulse"},
+        "RESP": {"resp"},
+    }
+    colunas_normalizadas = {
+        "".join(str(coluna).casefold().split()): coluna
+        for coluna in df.columns
+    }
     canais = [
-        c for c in df.columns
-        if c in ["HR", "SpO2", "NBPs", "NBPd", "NBPm"]
+        (nome_canal, coluna)
+        for nome_canal, aliases in aliases_canais.items()
+        if (coluna := next(
+            (
+                colunas_normalizadas[alias]
+                for alias in aliases
+                if alias in colunas_normalizadas
+            ),
+            None,
+        )) is not None
     ]
-    #HR	Frequência cardíaca, geralmente calculada a partir do ECG	bpm
-    #SpO2	Saturação periférica de oxigênio no sangue, medida por oxímetro de pulso	%
-    #NBPs	Pressão arterial não invasiva sistólica	mmHg
-    #NBPd	Pressão arterial não invasiva diastólica	mmHg
-    #NBPm	Pressão arterial não invasiva média (PAM)	mmHg
 
-
-    for canal in canais:
+    for nome_canal, canal in canais:
         plt.figure(figsize=(12, 3))
 
         plt.plot(
@@ -30,14 +76,27 @@ def gerar_graficos_sinais_vitais(df):
             df[canal]
         )
 
-        plt.title(f"Sinal vital: {canal}")
+        plt.title(f"Sinal vital: {nome_canal}")
         plt.xlabel("Tempo (segundos)")
-        plt.ylabel(canal)
+        plt.ylabel(nome_canal)
         plt.grid(True)
         plt.tight_layout()
-        plt.savefig(f"grafico_{canal}.png", dpi=300)
+        nome_paciente = paciente["nome"].upper().replace(" ", "_")
+        data_hora = Path(diretorio_saida).name
+        nome_arquivo = (
+            f"grafico_{nome_canal}_{paciente['id']}_{nome_paciente}_{data_hora}.png"
+        )
+        plt.savefig(Path(diretorio_saida) / nome_arquivo, dpi=300)
         plt.close()
 
 
-gerar_graficos_sinais_vitais(df)
+gerar_graficos_sinais_vitais(df, paciente_3, diretorio_saida)
 
+caminho_csv = next(Path(diretorio_saida).glob("*.csv"))
+gerador_relatorios = GeradorRelatorios(
+    paciente_3,
+    caminho_csv,
+    diretorio_saida,
+)
+caminho_relatorio = gerador_relatorios.gerar_relatorio()
+print(f"Relatório JSON gerado: {caminho_relatorio}")
