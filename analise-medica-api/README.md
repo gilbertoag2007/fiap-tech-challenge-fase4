@@ -51,6 +51,14 @@ corresponder ao mesmo paciente. A API retorna o conteúdo do relatório JSON mai
 recente disponível para esse paciente ou HTTP 404 com `Relatório não localizado.`
 quando não houver correspondência ou relatório.
 
+### Baixar gráficos
+
+Envie uma requisição `GET` para `/v1/sinais-vitais/graficos` com `cpf`, `id`
+ou ambos como query params. Quando ambos forem informados, eles devem
+corresponder ao mesmo paciente. A API retorna um arquivo ZIP com os gráficos
+PNG da execução mais recente que possui imagens. Se não houver gráficos para o
+paciente, responde com HTTP 404 e `Gráficos não localizados para o paciente informado.`
+
 ### Baixar sinais vitais de um paciente
 
 Envie uma requisição `POST` para `/v1/sinais-vitais/` com o ID cadastrado:

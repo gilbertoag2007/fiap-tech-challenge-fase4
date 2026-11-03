@@ -1,7 +1,9 @@
 import json
 from datetime import datetime
+from io import BytesIO
 from pathlib import Path
 from typing import Any
+from zipfile import ZIP_DEFLATED, ZipFile
 
 from integrations.gerador_graficos import GeradorGraficos
 from integrations.integracao_physionet import IntegracaoPhysioNet
@@ -13,6 +15,10 @@ class PacienteNaoLocalizadoError(Exception):
 
 
 class RelatorioNaoLocalizadoError(Exception):
+    pass
+
+
+class GraficosNaoLocalizadosError(Exception):
     pass
 
 
@@ -37,6 +43,55 @@ class ServicoSinaisVitais:
             for paciente in pacientes.values()
         ]
 
+    def _buscar_paciente_por_identificadores(
+        self,
+        cpf: str | None,
+        id_registro: str | None,
+    ) -> dict[str, Any] | None:
+        with self.caminho_catalogo_pacientes.open(encoding="utf-8") as arquivo_catalogo:
+            pacientes = json.load(arquivo_catalogo)
+
+        return next(
+            (
+                paciente
+                for paciente in pacientes.values()
+                if (cpf is None or paciente.get("cpf") == cpf)
+                and (id_registro is None or paciente.get("id") == id_registro)
+            ),
+            None,
+        )
+
+    @staticmethod
+    def _arquivos_mais_recentes(
+        diretorio_paciente: Path,
+        padrao: str,
+    ) -> list[Path]:
+        execucoes_com_arquivos = []
+        if diretorio_paciente.is_dir():
+            for diretorio_execucao in diretorio_paciente.iterdir():
+                if not diretorio_execucao.is_dir():
+                    continue
+                try:
+                    data_hora_execucao = datetime.strptime(
+                        diretorio_execucao.name,
+                        "%Y%m%d_%H%M%S",
+                    )
+                except ValueError:
+                    continue
+
+                arquivos = sorted(diretorio_execucao.glob(padrao))
+                if arquivos:
+                    execucoes_com_arquivos.append((data_hora_execucao, arquivos))
+
+        if not execucoes_com_arquivos:
+            return []
+
+        _, arquivos_mais_recentes = max(
+            execucoes_com_arquivos,
+            key=lambda execucao: execucao[0],
+        )
+        return arquivos_mais_recentes
+
     def _buscar_paciente(self, id_registro: str) -> dict[str, Any]:
         with self.caminho_catalogo_pacientes.open(encoding="utf-8") as arquivo_catalogo:
             pacientes = json.load(arquivo_catalogo)
@@ -58,49 +113,45 @@ class ServicoSinaisVitais:
         cpf: str | None = None,
         id_registro: str | None = None,
     ) -> dict[str, Any]:
-        with self.caminho_catalogo_pacientes.open(encoding="utf-8") as arquivo_catalogo:
-            pacientes = json.load(arquivo_catalogo)
-
-        paciente = next(
-            (
-                paciente
-                for paciente in pacientes.values()
-                if (cpf is None or paciente.get("cpf") == cpf)
-                and (id_registro is None or paciente.get("id") == id_registro)
-            ),
-            None,
-        )
+        paciente = self._buscar_paciente_por_identificadores(cpf, id_registro)
         if paciente is None:
             raise RelatorioNaoLocalizadoError
 
         nome_paciente = "_".join(str(paciente["nome"]).upper().split())
         diretorio_paciente = self.diretorio_saida / nome_paciente
-        execucoes_com_relatorio = []
-        if diretorio_paciente.is_dir():
-            for diretorio_execucao in diretorio_paciente.iterdir():
-                if not diretorio_execucao.is_dir():
-                    continue
-                try:
-                    data_hora_execucao = datetime.strptime(
-                        diretorio_execucao.name,
-                        "%Y%m%d_%H%M%S",
-                    )
-                except ValueError:
-                    continue
-
-                relatorios = sorted(diretorio_execucao.glob("RELATORIO_*.json"))
-                if relatorios:
-                    execucoes_com_relatorio.append((data_hora_execucao, relatorios))
-
-        if not execucoes_com_relatorio:
+        relatorios = self._arquivos_mais_recentes(
+            diretorio_paciente,
+            "RELATORIO_*.json",
+        )
+        if not relatorios:
             raise RelatorioNaoLocalizadoError
 
-        _, relatorios_mais_recentes = max(
-            execucoes_com_relatorio,
-            key=lambda execucao: execucao[0],
-        )
-        with relatorios_mais_recentes[-1].open(encoding="utf-8") as arquivo_relatorio:
+        with relatorios[-1].open(encoding="utf-8") as arquivo_relatorio:
             return json.load(arquivo_relatorio)
+
+    def recuperar_graficos_zip(
+        self,
+        cpf: str | None = None,
+        id_registro: str | None = None,
+    ) -> tuple[bytes, str]:
+        paciente = self._buscar_paciente_por_identificadores(cpf, id_registro)
+        if paciente is None:
+            raise GraficosNaoLocalizadosError
+
+        nome_paciente = "_".join(str(paciente["nome"]).upper().split())
+        diretorio_paciente = self.diretorio_saida / nome_paciente
+        graficos = self._arquivos_mais_recentes(diretorio_paciente, "*.png")
+        if not graficos:
+            raise GraficosNaoLocalizadosError
+
+        conteudo_zip = BytesIO()
+        with ZipFile(conteudo_zip, mode="w", compression=ZIP_DEFLATED) as arquivo_zip:
+            for grafico in graficos:
+                arquivo_zip.write(grafico, arcname=grafico.name)
+
+        data_hora_execucao = graficos[0].parent.name
+        nome_arquivo = f"GRAFICOS_{nome_paciente}_{data_hora_execucao}.zip"
+        return conteudo_zip.getvalue(), nome_arquivo
 
     def baixar_dados_paciente(self, id_registro: str) -> dict[str, Any]:
         paciente = self._buscar_paciente(id_registro)
