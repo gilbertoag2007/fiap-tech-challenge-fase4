@@ -1,12 +1,13 @@
 from pathlib import Path
 from typing import Any
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
 from integrations.integracao_physionet import ErroRegistroExterno
 from services.sinais_vitais_service import (
     PacienteNaoLocalizadoError,
+    RelatorioNaoLocalizadoError,
     ServicoSinaisVitais,
 )
 
@@ -38,6 +39,30 @@ def _criar_servico() -> ServicoSinaisVitais:
 @roteador.get("/paciente", response_model=list[PacienteResponse])
 def listar_pacientes() -> list[dict[str, Any]]:
     return _criar_servico().listar_pacientes()
+
+
+@roteador.get("/relatorio")
+def recuperar_relatorio(
+    cpf: str | None = Query(default=None),
+    id_registro: str | None = Query(default=None, alias="id"),
+) -> dict[str, Any]:
+    cpf = cpf.strip() if cpf and cpf.strip() else None
+    id_registro = (
+        id_registro.strip() if id_registro and id_registro.strip() else None
+    )
+    if cpf is None and id_registro is None:
+        raise HTTPException(
+            status_code=422,
+            detail="Informe ao menos um dos parâmetros: cpf ou id.",
+        )
+
+    try:
+        return _criar_servico().recuperar_relatorio(cpf, id_registro)
+    except RelatorioNaoLocalizadoError as error:
+        raise HTTPException(
+            status_code=404,
+            detail="Relatório não localizado.",
+        ) from error
 
 
 @roteador.post("/")

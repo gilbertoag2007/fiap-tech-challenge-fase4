@@ -43,6 +43,14 @@ Envie uma requisição `GET` para `/v1/sinais-vitais/paciente`, sem body. A
 resposta contém os campos `id`, `cpf`, `nome`, `idade`, `genero` e `prontuario`
 de cada paciente cadastrado em `data/pacientes.json`.
 
+### Recuperar relatório de análise
+
+Envie uma requisição `GET` para `/v1/sinais-vitais/relatorio` com `cpf`, `id`
+ou ambos como query params. Quando ambos forem informados, eles devem
+corresponder ao mesmo paciente. A API retorna o conteúdo do relatório JSON mais
+recente disponível para esse paciente ou HTTP 404 com `Relatório não localizado.`
+quando não houver correspondência ou relatório.
+
 ### Baixar sinais vitais de um paciente
 
 Envie uma requisição `POST` para `/v1/sinais-vitais/` com o ID cadastrado:
