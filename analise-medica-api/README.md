@@ -37,6 +37,14 @@ ignorados pelo Git; `data/pacientes.json` e o marcador da pasta são versionados
 
 ## Baixar sinais vitais
 
+### Listar pacientes
+
+Envie uma requisição `GET` para `/v1/sinais-vitais/paciente`, sem body. A
+resposta contém os campos `id`, `cpf`, `nome`, `idade`, `genero` e `prontuario`
+de cada paciente cadastrado em `data/pacientes.json`.
+
+### Baixar sinais vitais de um paciente
+
 Envie uma requisição `POST` para `/v1/sinais-vitais/` com o ID cadastrado:
 
 ```json

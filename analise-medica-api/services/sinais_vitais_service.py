@@ -22,6 +22,16 @@ class ServicoSinaisVitais:
         self.diretorio_saida = Path(diretorio_saida)
         self.integracao = integracao or IntegracaoPhysioNet()
 
+    def listar_pacientes(self) -> list[dict[str, Any]]:
+        with self.caminho_catalogo_pacientes.open(encoding="utf-8") as arquivo_catalogo:
+            pacientes = json.load(arquivo_catalogo)
+
+        campos_publicos = ("id", "cpf", "nome", "idade", "genero", "prontuario")
+        return [
+            {campo: paciente[campo] for campo in campos_publicos}
+            for paciente in pacientes.values()
+        ]
+
     def _buscar_paciente(self, id_registro: str) -> dict[str, Any]:
         with self.caminho_catalogo_pacientes.open(encoding="utf-8") as arquivo_catalogo:
             pacientes = json.load(arquivo_catalogo)

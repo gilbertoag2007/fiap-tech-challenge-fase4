@@ -15,6 +15,15 @@ class RequisicaoSinaisVitais(BaseModel):
     id: str
 
 
+class PacienteResponse(BaseModel):
+    id: str
+    cpf: str
+    nome: str
+    idade: int
+    genero: str
+    prontuario: str
+
+
 roteador = APIRouter(prefix="/v1/sinais-vitais", tags=["Sinais vitais"])
 
 
@@ -24,6 +33,11 @@ def _criar_servico() -> ServicoSinaisVitais:
         caminho_catalogo_pacientes=diretorio_api / "data" / "pacientes.json",
         diretorio_saida=diretorio_api / "data",
     )
+
+
+@roteador.get("/paciente", response_model=list[PacienteResponse])
+def listar_pacientes() -> list[dict[str, Any]]:
+    return _criar_servico().listar_pacientes()
 
 
 @roteador.post("/")

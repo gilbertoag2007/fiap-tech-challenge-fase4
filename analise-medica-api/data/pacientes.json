@@ -1,6 +1,7 @@
 {
   "paciente_1": {
     "id": "3000190n",
+    "cpf": "12345678900",
     "nome": "Carlos Alberto Lima",
     "idade": 55,
     "genero": "Masculino",
@@ -10,6 +11,7 @@
   },
   "paciente_2": {
     "id": "3000086n",
+    "cpf": "98765432100",
     "nome": "Leticia Freitas",
     "idade": 18,
     "genero": "Feminino",
@@ -19,6 +21,7 @@
   },
   "paciente_3": {
     "id": "3141595n",
+    "cpf": "11122233344",
     "nome": "Juliana Oliveira",
     "idade": 45,
     "genero": "Feminino",
