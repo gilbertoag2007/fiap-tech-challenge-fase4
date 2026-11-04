@@ -59,6 +59,22 @@ corresponder ao mesmo paciente. A API retorna um arquivo ZIP com os gráficos
 PNG da execução mais recente que possui imagens. Se não houver gráficos para o
 paciente, responde com HTTP 404 e `Gráficos não localizados para o paciente informado.`
 
+### Recuperar CSV detalhado dos sinais vitais
+
+Envie uma requisição `GET` para `/v1/sinais-vitais/datalhamento` com `cpf`,
+`id` ou ambos como query params:
+
+```text
+/v1/sinais-vitais/datalhamento?cpf=12345678900&id=3000190n
+```
+
+Quando ambos forem informados, eles devem corresponder ao mesmo paciente. A API
+retorna como anexo o CSV da execução mais recente disponível na pasta desse
+paciente. Se nenhum parâmetro for informado, responde com HTTP 422. Se o
+paciente não corresponder aos identificadores ou o CSV não for localizado,
+responde com HTTP 404 e
+`Arquivo detalhado com os sinais vitais do paciente selecionado não foi localizado.`
+
 ### Baixar sinais vitais de um paciente
 
 Envie uma requisição `POST` para `/v1/sinais-vitais/` com o ID cadastrado:

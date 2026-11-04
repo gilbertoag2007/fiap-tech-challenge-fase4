@@ -22,6 +22,10 @@ class GraficosNaoLocalizadosError(Exception):
     pass
 
 
+class SinaisVitaisDetalhadosNaoLocalizadosError(Exception):
+    pass
+
+
 class ServicoSinaisVitais:
     def __init__(
         self,
@@ -152,6 +156,21 @@ class ServicoSinaisVitais:
         data_hora_execucao = graficos[0].parent.name
         nome_arquivo = f"GRAFICOS_{nome_paciente}_{data_hora_execucao}.zip"
         return conteudo_zip.getvalue(), nome_arquivo
+
+    def recuperar_csv(self, cpf: str, id_registro: str) -> Path:
+        paciente = self._buscar_paciente_por_identificadores(cpf, id_registro)
+        if paciente is None:
+            raise SinaisVitaisDetalhadosNaoLocalizadosError
+
+        nome_paciente = "_".join(str(paciente["nome"]).upper().split())
+        diretorio_paciente = self.diretorio_saida / nome_paciente
+        arquivos_csv = self._arquivos_mais_recentes(
+            diretorio_paciente,
+            f"SINAIS_VITAIS_{paciente['id']}_*.csv",
+        )
+        if not arquivos_csv:
+            raise SinaisVitaisDetalhadosNaoLocalizadosError
+        return arquivos_csv[-1]
 
     def baixar_dados_paciente(self, id_registro: str) -> dict[str, Any]:
         paciente = self._buscar_paciente(id_registro)

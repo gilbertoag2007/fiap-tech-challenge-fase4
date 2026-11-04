@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import APIRouter, HTTPException, Query, Response
+from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 from integrations.integracao_physionet import ErroRegistroExterno
@@ -9,6 +10,7 @@ from services.sinais_vitais_service import (
     GraficosNaoLocalizadosError,
     PacienteNaoLocalizadoError,
     RelatorioNaoLocalizadoError,
+    SinaisVitaisDetalhadosNaoLocalizadosError,
     ServicoSinaisVitais,
 )
 
@@ -96,6 +98,42 @@ def recuperar_graficos(
         content=conteudo_zip,
         media_type="application/zip",
         headers={"Content-Disposition": f'attachment; filename="{nome_arquivo}"'},
+    )
+
+
+@roteador.get("/datalhamento")
+def recuperar_sinais_vitais_detalhados(
+    cpf: str | None = Query(default=None),
+    id_registro: str | None = Query(default=None, alias="id"),
+) -> FileResponse:
+    cpf = cpf.strip() if cpf and cpf.strip() else None
+    id_registro = (
+        id_registro.strip() if id_registro and id_registro.strip() else None
+    )
+    if cpf is None and id_registro is None:
+        raise HTTPException(
+            status_code=422,
+            detail="Informe ao menos um dos parâmetros: cpf ou id.",
+        )
+
+    try:
+        caminho_csv = _criar_servico().recuperar_csv(
+            cpf,
+            id_registro,
+        )
+    except SinaisVitaisDetalhadosNaoLocalizadosError as error:
+        raise HTTPException(
+            status_code=404,
+            detail=(
+                "Arquivo detalhado com os sinais vitais do paciente "
+                "selecionado não foi localizado."
+            ),
+        ) from error
+
+    return FileResponse(
+        path=caminho_csv,
+        media_type="text/csv",
+        filename=caminho_csv.name,
     )
 
 
