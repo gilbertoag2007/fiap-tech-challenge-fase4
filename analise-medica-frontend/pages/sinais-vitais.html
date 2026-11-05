@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#087e8b">
+    <meta name="description" content="Área de monitoramento de sinais vitais do Prontuário Digital.">
+    <title>Sinais Vitais | Prontuário Digital</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link href="../assets/css/style.css" rel="stylesheet">
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="site-header">
+        <div class="container-fluid content-container">
+          <div class="d-flex align-items-center gap-3 py-3">
+            <div class="brand-icon" aria-hidden="true">
+              <i class="bi bi-heart-pulse"></i>
+            </div>
+            <div class="brand-copy">
+              <a class="brand-title" href="../index.html">Prontuário Digital</a>
+              <p class="brand-subtitle mb-0">Sistema de acompanhamento e análise de pacientes</p>
+            </div>
+            <span class="academic-badge ms-auto">
+              <i class="bi bi-mortarboard me-1" aria-hidden="true"></i>
+              Sistema acadêmico
+            </span>
+          </div>
+        </div>
+      </header>
+
+      <nav class="navbar navbar-expand-md app-navbar" aria-label="Navegação principal">
+        <div class="container-fluid content-container">
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavigation" aria-controls="mainNavigation" aria-expanded="false" aria-label="Abrir ou fechar menu">
+            <span class="navbar-toggler-icon"></span>
+            <span class="ms-2">Menu</span>
+          </button>
+          <div class="collapse navbar-collapse" id="mainNavigation">
+            <ul class="navbar-nav">
+              <li class="nav-item">
+                <a class="nav-link" href="../index.html">
+                  <i class="bi bi-house-door me-2" aria-hidden="true"></i>Início
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link active" href="sinais-vitais.html" aria-current="page">
+                  <i class="bi bi-activity me-2" aria-hidden="true"></i>Sinais Vitais
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+
+      <main class="main-content">
+        <div class="container-fluid content-container">
+          <section class="page-heading" aria-labelledby="page-title">
+            <p class="eyebrow">Acompanhamento clínico</p>
+            <h1 id="page-title">Monitoramento de Sinais Vitais</h1>
+            <p class="lead page-description">Acompanhamento dos indicadores fisiológicos dos pacientes</p>
+          </section>
+
+          <section class="patient-selection-card card border-0" aria-labelledby="patient-selection-title">
+            <div class="card-body">
+              <div class="selection-heading">
+                <div>
+                  <p class="eyebrow mb-1">Consulta de pacientes</p>
+                  <h2 class="h5 mb-0" id="patient-selection-title">Selecionar paciente</h2>
+                </div>
+                <span class="selection-icon" aria-hidden="true">
+                  <i class="bi bi-person-vcard"></i>
+                </span>
+              </div>
+
+              <div class="alert alert-info d-flex align-items-center gap-2 patient-loading" id="patient-loading" role="status" aria-live="polite">
+                <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                <span>Carregando pacientes...</span>
+              </div>
+
+              <div class="alert alert-danger d-none" id="patient-error" role="alert">
+                <div class="d-flex flex-column flex-sm-row align-items-sm-center justify-content-between gap-2">
+                  <span id="patient-error-message"></span>
+                  <button class="btn btn-sm btn-outline-danger d-none" id="retry-patients" type="button">Tentar novamente</button>
+                </div>
+              </div>
+
+              <div class="alert alert-warning d-none" id="patient-empty" role="status">
+                Nenhum paciente está disponível para seleção.
+              </div>
+
+              <div class="row g-3">
+                <div class="col-12 col-lg-5">
+                  <label class="form-label" for="patient-search">Pesquisar por nome, CPF ou identificador</label>
+                  <div class="input-group">
+                    <span class="input-group-text" aria-hidden="true"><i class="bi bi-search"></i></span>
+                    <input class="form-control" id="patient-search" type="search" placeholder="Digite para pesquisar" autocomplete="off" disabled>
+                  </div>
+                  <div class="form-text">A pesquisa é feita nos pacientes carregados.</div>
+                </div>
+                <div class="col-12 col-lg-7">
+                  <label class="form-label" for="patient-select">Paciente</label>
+                  <select class="form-select" id="patient-select" aria-describedby="patient-select-help" disabled>
+                    <option value="">Aguardando lista de pacientes...</option>
+                  </select>
+                  <div class="form-text" id="patient-select-help">Selecione um paciente para visualizar sua identificação.</div>
+                </div>
+              </div>
+
+              <p class="search-empty-message d-none mb-0 mt-3" id="patient-no-results" role="status">
+                Nenhum paciente encontrado para essa pesquisa.
+              </p>
+            </div>
+          </section>
+
+          <section class="patient-details d-none" id="patient-details" aria-label="Identificação do paciente selecionado" aria-live="polite"></section>
+
+          <section class="monitoring-placeholder vital-signs-placeholder" id="vital-signs-placeholder" aria-label="Área reservada para os sinais vitais" aria-live="polite">
+            <div class="placeholder-content">
+              <span class="placeholder-icon" aria-hidden="true"><i class="bi bi-activity"></i></span>
+              <p class="mb-0" id="vital-signs-message">Selecione um paciente para visualizar os sinais vitais.</p>
+            </div>
+          </section>
+
+          <section class="vital-signs-section d-none" id="vital-signs-section" aria-labelledby="vital-signs-title">
+            <div class="vital-signs-heading">
+              <div>
+                <p class="eyebrow mb-1">Dados do paciente</p>
+                <h2 class="h4 mb-0" id="vital-signs-title">Monitoramento dos Sinais Vitais</h2>
+              </div>
+              <span class="vital-patient-label" id="vital-patient-label"></span>
+            </div>
+
+            <div class="alert alert-info d-none vital-status-alert" id="vital-loading" role="status" aria-live="polite">
+              <span class="spinner-border spinner-border-sm me-2" aria-hidden="true"></span>
+              Carregando sinais vitais do paciente...
+            </div>
+            <div class="alert alert-danger d-none vital-status-alert" id="vital-error" role="alert"></div>
+            <div class="alert alert-warning d-none vital-status-alert" id="vital-empty" role="status">
+              Não existem registros de sinais vitais disponíveis para este paciente.
+            </div>
+            <div class="alert alert-warning d-none vital-status-alert" id="vital-incomplete" role="status"></div>
+
+            <div class="row g-4" id="vital-chart-grid">
+              <div class="col-12 col-lg-6">
+                <article class="vital-chart-card card h-100">
+                  <div class="card-body">
+                    <div class="chart-card-heading">
+                      <div><h3 class="h6 mb-1">Frequência cardíaca</h3><span class="chart-code">HR</span></div>
+                      <span class="chart-unit">bpm</span>
+                    </div>
+                    <div class="chart-canvas-wrap"><canvas id="chart-hr" role="img" aria-label="Gráfico de frequência cardíaca"></canvas></div>
+                    <p class="chart-card-note d-none" id="note-hr"></p>
+                  </div>
+                  <footer class="chart-card-footer" id="period-hr">Tempo decorrido</footer>
+                </article>
+              </div>
+              <div class="col-12 col-lg-6">
+                <article class="vital-chart-card card h-100">
+                  <div class="card-body">
+                    <div class="chart-card-heading">
+                      <div><h3 class="h6 mb-1">Saturação de oxigênio</h3><span class="chart-code">SpO2</span></div>
+                      <span class="chart-unit">%</span>
+                    </div>
+                    <div class="chart-canvas-wrap"><canvas id="chart-spo2" role="img" aria-label="Gráfico de saturação de oxigênio"></canvas></div>
+                    <p class="chart-card-note d-none" id="note-spo2"></p>
+                  </div>
+                  <footer class="chart-card-footer" id="period-spo2">Tempo decorrido</footer>
+                </article>
+              </div>
+              <div class="col-12 col-lg-6">
+                <article class="vital-chart-card card h-100">
+                  <div class="card-body">
+                    <div class="chart-card-heading">
+                      <div><h3 class="h6 mb-1">Pressão arterial sistólica</h3><span class="chart-code">NBPs</span></div>
+                      <span class="chart-unit">mmHg</span>
+                    </div>
+                    <div class="chart-canvas-wrap"><canvas id="chart-nbps" role="img" aria-label="Gráfico de pressão arterial sistólica"></canvas></div>
+                    <p class="chart-card-note d-none" id="note-nbps"></p>
+                  </div>
+                  <footer class="chart-card-footer" id="period-nbps">Tempo decorrido</footer>
+                </article>
+              </div>
+              <div class="col-12 col-lg-6">
+                <article class="vital-chart-card card h-100">
+                  <div class="card-body">
+                    <div class="chart-card-heading">
+                      <div><h3 class="h6 mb-1">Pressão arterial diastólica</h3><span class="chart-code">NBPd</span></div>
+                      <span class="chart-unit">mmHg</span>
+                    </div>
+                    <div class="chart-canvas-wrap"><canvas id="chart-nbpd" role="img" aria-label="Gráfico de pressão arterial diastólica"></canvas></div>
+                    <p class="chart-card-note d-none" id="note-nbpd"></p>
+                  </div>
+                  <footer class="chart-card-footer" id="period-nbpd">Tempo decorrido</footer>
+                </article>
+              </div>
+              <div class="col-12 col-lg-6">
+                <article class="vital-chart-card card h-100">
+                  <div class="card-body">
+                    <div class="chart-card-heading">
+                      <div><h3 class="h6 mb-1">Frequência do pulso periférico</h3><span class="chart-code">Pulse</span></div>
+                      <span class="chart-unit">bpm</span>
+                    </div>
+                    <div class="chart-canvas-wrap"><canvas id="chart-pulse" role="img" aria-label="Gráfico de frequência do pulso periférico"></canvas></div>
+                    <p class="chart-card-note d-none" id="note-pulse"></p>
+                  </div>
+                  <footer class="chart-card-footer" id="period-pulse">Tempo decorrido</footer>
+                </article>
+              </div>
+              <div class="col-12 col-lg-6">
+                <article class="vital-chart-card card h-100">
+                  <div class="card-body">
+                    <div class="chart-card-heading">
+                      <div><h3 class="h6 mb-1">Frequência respiratória</h3><span class="chart-code">Resp</span></div>
+                      <span class="chart-unit">rpm</span>
+                    </div>
+                    <div class="chart-canvas-wrap"><canvas id="chart-resp" role="img" aria-label="Gráfico de frequência respiratória"></canvas></div>
+                    <p class="chart-card-note d-none" id="note-resp"></p>
+                  </div>
+                  <footer class="chart-card-footer" id="period-resp">Tempo decorrido</footer>
+                </article>
+              </div>
+            </div>
+          </section>
+        </div>
+      </main>
+
+      <footer class="site-footer">
+        <div class="container-fluid content-container">
+          <div class="footer-content">
+            <span class="footer-brand">Prontuário Digital</span>
+            <span>Projeto acadêmico</span>
+            <span>Desenvolvido com HTML5, CSS3 e Bootstrap 5</span>
+            <span>&copy; <span data-current-year>2026</span></span>
+          </div>
+        </div>
+      </footer>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.7.9/dist/axios.min.js"></script>
+    <script src="../assets/js/app.js"></script>
+    <script src="../assets/js/config.js"></script>
+    <script src="../assets/js/services/api.js"></script>
+    <script src="../assets/js/services/paciente.service.js"></script>
+    <script src="../assets/js/components/paciente.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+    <script src="../assets/js/services/sinais-vitais.service.js"></script>
+    <script src="../assets/js/components/grafico.js"></script>
+    <script src="../assets/js/pages/sinais-vitais.js"></script>
+  </body>
+</html>
