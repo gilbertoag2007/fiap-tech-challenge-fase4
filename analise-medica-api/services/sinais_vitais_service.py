@@ -27,6 +27,15 @@ class SinaisVitaisDetalhadosNaoLocalizadosError(Exception):
 
 
 class ServicoSinaisVitais:
+    CHAVE_REFERENCIA_POR_CANAL = {
+        "HR": "frequencia_cardiaca",
+        "SpO2": "saturacao_oxigenio",
+        "NBPs": "pressao_arterial_sistolica",
+        "NBPd": "pressao_arterial_diastolica",
+        "PULSE": "frequencia_pulso_periferico",
+        "RESP": "frequencia_respiratoria",
+    }
+
     def __init__(
         self,
         caminho_catalogo_pacientes: str | Path,
@@ -36,6 +45,55 @@ class ServicoSinaisVitais:
         self.caminho_catalogo_pacientes = Path(caminho_catalogo_pacientes)
         self.diretorio_saida = Path(diretorio_saida)
         self.integracao = integracao or IntegracaoPhysioNet()
+
+    def _carregar_referencias_sinais_vitais(self) -> dict[str, Any]:
+        caminho_arquivo = self.diretorio_saida / "referencias_sinais_vitais.json"
+        if not caminho_arquivo.exists():
+            return {"sinais_vitais": {}}
+
+        with caminho_arquivo.open(encoding="utf-8") as arquivo:
+            dados = json.load(arquivo)
+
+        return dados if isinstance(dados, dict) else {"sinais_vitais": {}}
+
+    def listar_tabelas_referencia(self) -> dict[str, Any]:
+        dados = self._carregar_referencias_sinais_vitais()
+        referencias = dados.get("sinais_vitais", {})
+        tabelas = {}
+
+        for codigo, chave in self.CHAVE_REFERENCIA_POR_CANAL.items():
+            if chave in referencias:
+                tabelas[codigo] = referencias[chave]
+
+        return tabelas
+
+    def recuperar_tabela_referencia(self, sinal: str) -> dict[str, Any]:
+        chave_sinal = (sinal or "").strip()
+        if not chave_sinal:
+            raise ValueError("Sinal vital não informado.")
+
+        sinal_normalizado = "".join(ch for ch in chave_sinal.upper() if ch.isalnum())
+        referencias = self.listar_tabelas_referencia()
+        codigo_por_alias = {
+            "HR": "HR",
+            "SPO2": "SpO2",
+            "NBPS": "NBPs",
+            "NBPD": "NBPd",
+            "PULSE": "PULSE",
+            "RESP": "RESP",
+            "FREQUENCIACARDIACA": "HR",
+            "SATURACAOOXIGENIO": "SpO2",
+            "PRESSAOARTERIALSISTOLICA": "NBPs",
+            "PRESSAOARTERIALDIASTOLICA": "NBPd",
+            "FREQUENCIAPULSOPERIFERICO": "PULSE",
+            "FREQUENCIARESPIRATORIA": "RESP",
+        }
+
+        codigo = codigo_por_alias.get(sinal_normalizado)
+        if codigo and codigo in referencias:
+            return referencias[codigo]
+
+        raise ValueError(f"Tabela de referência não localizada para o sinal '{sinal}'.")
 
     def listar_pacientes(self) -> list[dict[str, Any]]:
         with self.caminho_catalogo_pacientes.open(encoding="utf-8") as arquivo_catalogo:

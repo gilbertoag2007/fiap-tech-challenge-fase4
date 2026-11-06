@@ -100,44 +100,147 @@
     return "neutral";
   }
 
-  function renderIndicatorSummary(definition, indicatorData) {
+  function renderIndicatorSummary(
+    definition,
+    indicatorData,
+    referenceTable,
+    referenceError,
+  ) {
     const container = document.getElementById(`result-${definition.key}`);
     if (!container) {
       return;
     }
 
-    if (!indicatorData) {
+    if (!indicatorData && !referenceTable && !referenceError) {
       container.classList.add("d-none");
       container.replaceChildren();
       return;
     }
 
-    const status = String(indicatorData.status || "Sem avaliação").trim();
-    const tone = getStatusTone(status);
     const header = document.createElement("div");
     header.className = "chart-result-header";
 
     const title = document.createElement("span");
     title.className = "chart-result-title";
-    title.textContent = indicatorData.descricao || definition.name;
+    title.textContent = indicatorData?.descricao || definition.name;
 
-    const badge = document.createElement("span");
-    badge.className = `chart-result-status status-${tone}`;
-    badge.textContent = status || "Sem avaliação";
-
-    header.append(title, badge);
+    header.append(title);
+    if (indicatorData) {
+      const status = String(indicatorData.status || "Sem avaliação").trim();
+      const badge = document.createElement("span");
+      badge.className = `chart-result-status status-${getStatusTone(status)}`;
+      badge.textContent = status || "Sem avaliação";
+      header.append(badge);
+    }
 
     const description = document.createElement("p");
     description.className = "chart-result-description";
     description.textContent = `${definition.name} · ${definition.unit}`;
+    container.replaceChildren(header, description);
+    if (indicatorData?.observacao) {
+      const observation = document.createElement("p");
+      observation.className = "chart-result-observation";
+      observation.textContent = indicatorData.observacao;
+      container.append(observation);
+    }
 
-    const observation = document.createElement("p");
-    observation.className = "chart-result-observation";
-    observation.textContent =
-      indicatorData.observacao || "Sem observação adicional para este indicador.";
+    const referenceDetails = document.createElement("details");
+    referenceDetails.className = "reference-table-details";
+    const referenceSummary = document.createElement("summary");
+    referenceSummary.textContent = "Consultar tabela de referência";
+    referenceDetails.append(referenceSummary);
 
-    container.replaceChildren(header, description, observation);
+    if (referenceError) {
+      const errorMessage = document.createElement("p");
+      errorMessage.className = "reference-table-message text-danger";
+      errorMessage.textContent = "Não foi possível carregar a tabela de referência.";
+      referenceDetails.append(errorMessage);
+    } else if (referenceTable) {
+      referenceDetails.append(renderReferenceTable(referenceTable, definition.unit));
+    } else {
+      const emptyMessage = document.createElement("p");
+      emptyMessage.className = "reference-table-message";
+      emptyMessage.textContent = "Tabela de referência indisponível.";
+      referenceDetails.append(emptyMessage);
+    }
+
+    container.append(referenceDetails);
     container.classList.remove("d-none");
+  }
+
+  function renderReferenceTable(reference, unit) {
+    const rows = [];
+    const adultRange = reference.faixa_adulta_normal;
+    if (adultRange && adultRange.minimo !== undefined && adultRange.maximo !== undefined) {
+      rows.push({
+        context: "Adultos",
+        value: `${adultRange.minimo} a ${adultRange.maximo} ${unit}`,
+      });
+    }
+
+    Object.entries(reference.sexo || {}).forEach(([sex, value]) => {
+      rows.push({
+        context: sex.charAt(0).toLocaleUpperCase("pt-BR") + sex.slice(1),
+        value,
+      });
+    });
+
+    (Array.isArray(reference.faixa_por_idade) ? reference.faixa_por_idade : [])
+      .forEach((range) => {
+        if (range.faixa_etaria) {
+          rows.push({
+            context: range.faixa_etaria,
+            value:
+              range.minimo !== undefined && range.maximo !== undefined
+                ? `${range.minimo} a ${range.maximo} ${unit}`
+                : "Não informado",
+          });
+        }
+      });
+
+    const wrapper = document.createElement("div");
+    wrapper.className = "reference-table-wrapper";
+    if (!rows.length) {
+      const message = document.createElement("p");
+      message.className = "reference-table-message";
+      message.textContent = "A tabela não contém faixas cadastradas.";
+      wrapper.append(message);
+      return wrapper;
+    }
+
+    const table = document.createElement("table");
+    table.className = "table table-sm table-bordered reference-table";
+    const head = document.createElement("thead");
+    const headerRow = document.createElement("tr");
+    ["Grupo", "Valores de referência"].forEach((label) => {
+      const cell = document.createElement("th");
+      cell.scope = "col";
+      cell.textContent = label;
+      headerRow.append(cell);
+    });
+    head.append(headerRow);
+
+    const body = document.createElement("tbody");
+    rows.forEach(({ context, value }) => {
+      const row = document.createElement("tr");
+      const contextCell = document.createElement("th");
+      contextCell.scope = "row";
+      contextCell.textContent = context;
+      const valueCell = document.createElement("td");
+      valueCell.textContent = value;
+      row.append(contextCell, valueCell);
+      body.append(row);
+    });
+    table.append(head, body);
+    wrapper.append(table);
+
+    if (reference.observacao) {
+      const note = document.createElement("p");
+      note.className = "reference-table-note";
+      note.textContent = reference.observacao;
+      wrapper.append(note);
+    }
+    return wrapper;
   }
 
   function renderAnalysisSummary(relatorio) {
@@ -431,14 +534,30 @@
       .join(":");
   }
 
-  function renderVitalSigns(parsedCsv, relatorio) {
+  function renderVitalSigns(parsedCsv, relatorio, referencias) {
     const { records, fieldByKey } = parsedCsv;
     vitalSignsChartGrid.classList.remove("d-none");
 
     if (relatorio && relatorio.sinais_vitais) {
       vitalDefinitions.forEach((definition) => {
         const indicatorData = relatorio.sinais_vitais[definition.code];
-        renderIndicatorSummary(definition, indicatorData);
+        const referenceResult = referencias[definition.code];
+        renderIndicatorSummary(
+          definition,
+          indicatorData,
+          referenceResult?.status === "fulfilled" ? referenceResult.value : null,
+          referenceResult?.status === "rejected",
+        );
+      });
+    } else {
+      vitalDefinitions.forEach((definition) => {
+        const referenceResult = referencias[definition.code];
+        renderIndicatorSummary(
+          definition,
+          null,
+          referenceResult?.status === "fulfilled" ? referenceResult.value : null,
+          referenceResult?.status === "rejected",
+        );
       });
     }
 
@@ -530,14 +649,39 @@
     });
 
     try {
-      const [csvResult, relatorioResult] = await Promise.allSettled([
-        window.sinaisVitaisService.buscarSinaisVitais(patient.id),
-        window.sinaisVitaisService.buscarRelatorioSinaisVitais(patient.id),
-      ]);
+      const [[csvResult, relatorioResult], referenceResults] =
+        await Promise.all([
+          Promise.allSettled([
+            window.sinaisVitaisService.buscarSinaisVitais(patient.id),
+            window.sinaisVitaisService.buscarRelatorioSinaisVitais(patient.id),
+          ]),
+          Promise.allSettled(
+            vitalDefinitions.map((definition) =>
+              window.sinaisVitaisService.buscarTabelaReferenciaSinalVital(
+                definition.code,
+              ),
+            ),
+          ),
+        ]);
 
       if (requestId !== vitalSignsRequest) {
         return;
       }
+
+      const referencias = Object.fromEntries(
+        vitalDefinitions.map((definition, index) => [
+          definition.code,
+          referenceResults[index],
+        ]),
+      );
+      referenceResults.forEach((result, index) => {
+        if (result.status === "rejected") {
+          console.error(
+            `Não foi possível carregar a tabela de referência para ${vitalDefinitions[index].code}.`,
+            result.reason,
+          );
+        }
+      });
 
       if (relatorioResult.status === "fulfilled") {
         renderAnalysisSummary(relatorioResult.value);
@@ -552,7 +696,11 @@
 
       const parsedCsv = parseVitalSignsCsv(csvResult.value);
       vitalSignsLoading.classList.add("d-none");
-      renderVitalSigns(parsedCsv, relatorioResult.status === "fulfilled" ? relatorioResult.value : null);
+      renderVitalSigns(
+        parsedCsv,
+        relatorioResult.status === "fulfilled" ? relatorioResult.value : null,
+        referencias,
+      );
     } catch (error) {
       if (requestId !== vitalSignsRequest) {
         return;

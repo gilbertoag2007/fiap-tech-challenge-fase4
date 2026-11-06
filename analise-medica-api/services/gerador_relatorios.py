@@ -7,6 +7,15 @@ import pandas as pd
 
 
 class GeradorRelatorios:
+    CHAVE_REFERENCIA_POR_CANAL = {
+        "HR": "frequencia_cardiaca",
+        "SpO2": "saturacao_oxigenio",
+        "NBPs": "pressao_arterial_sistolica",
+        "NBPd": "pressao_arterial_diastolica",
+        "PULSE": "frequencia_pulso_periferico",
+        "RESP": "frequencia_respiratoria",
+    }
+
     CANAIS = {
         "HR": {
             "descricao": "Frequência cardíaca",
@@ -83,10 +92,101 @@ class GeradorRelatorios:
         self.colunas_normalizadas = {
             self._normalizar_nome(coluna): coluna for coluna in self.df.columns
         }
+        self.referencias_sinais_vitais = self._carregar_referencias_sinais_vitais()
 
     @staticmethod
     def _normalizar_nome(nome: Any) -> str:
         return "".join(str(nome).casefold().split())
+
+    @staticmethod
+    def _carregar_referencias_sinais_vitais() -> dict[str, Any]:
+        caminho_arquivo = (
+            Path(__file__).resolve().parents[1] / "data" / "referencias_sinais_vitais.json"
+        )
+        if not caminho_arquivo.exists():
+            return {}
+
+        with caminho_arquivo.open(encoding="utf-8") as arquivo:
+            return json.load(arquivo)
+
+    def _obter_referencia_canal(self, canal: str) -> dict[str, Any]:
+        configuracao = self.CANAIS[canal]
+        chave_sinal = self.CHAVE_REFERENCIA_POR_CANAL.get(canal)
+        dados_referencia = {}
+
+        if chave_sinal:
+            dados_referencia = (
+                self.referencias_sinais_vitais.get("sinais_vitais", {})
+                .get(chave_sinal, {})
+            )
+
+        faixa_sexo = dados_referencia.get("sexo", {})
+        faixa_adulta = dados_referencia.get("faixa_adulta_normal", {})
+        faixa_por_idade = dados_referencia.get("faixa_por_idade", [])
+        idade = self.paciente.get("idade")
+        faixa_aplicada = dict(faixa_adulta)
+
+        genero = str(self.paciente.get("genero", "")).strip().casefold()
+        referencia_sexo = faixa_sexo.get(genero)
+        if isinstance(referencia_sexo, str) and referencia_sexo:
+            faixa_sexo_valores = {
+                "minimo": None,
+                "maximo": None,
+            }
+            partes = [
+                part.strip()
+                for part in referencia_sexo.replace("%", "").replace("mmhg", "").replace("bpm", "").replace("rpm", "").split("a")
+            ]
+            if len(partes) >= 2:
+                try:
+                    faixa_sexo_valores["minimo"] = float(partes[0].replace(",", "."))
+                    faixa_sexo_valores["maximo"] = float(partes[1].replace(",", "."))
+                except ValueError:
+                    faixa_sexo_valores = {"minimo": None, "maximo": None}
+            if faixa_sexo_valores["minimo"] is not None and faixa_sexo_valores["maximo"] is not None:
+                faixa_aplicada = {**faixa_aplicada, **faixa_sexo_valores}
+
+        if idade is not None:
+            try:
+                idade_numero = float(idade)
+            except (TypeError, ValueError):
+                idade_numero = None
+
+            if idade_numero is not None and idade_numero < 18:
+                faixa_selecionada = next(
+                    (
+                        faixa
+                        for faixa in faixa_por_idade
+                        if faixa.get("faixa_etaria")
+                        and isinstance(faixa.get("minimo"), (int, float))
+                        and isinstance(faixa.get("maximo"), (int, float))
+                        and faixa.get("minimo") <= idade_numero <= faixa.get("maximo")
+                    ),
+                    None,
+                )
+                if faixa_selecionada:
+                    faixa_aplicada = dict(faixa_selecionada)
+
+        referencia_texto = faixa_aplicada.get(
+            "observacao",
+            configuracao["referencia"],
+        )
+        if faixa_aplicada.get("minimo") is not None and faixa_aplicada.get("maximo") is not None:
+            referencia_texto = (
+                f"{faixa_aplicada['minimo']} a {faixa_aplicada['maximo']} "
+                f"{configuracao['unidade']}"
+            )
+
+        return {
+            "minimo": faixa_aplicada.get("minimo", configuracao["minimo"]),
+            "maximo": faixa_aplicada.get("maximo", configuracao["maximo"]),
+            "limite_superior_exclusivo": configuracao.get(
+                "limite_superior_exclusivo",
+                False,
+            ),
+            "referencia": referencia_texto,
+            "fonte": configuracao["fonte"],
+        }
 
     def _encontrar_coluna(self, aliases: set[str]) -> str | None:
         for alias in aliases:
@@ -148,13 +248,13 @@ class GeradorRelatorios:
 
     def _avaliar_canal(self, canal: str) -> dict[str, Any]:
         configuracao = self.CANAIS[canal]
+        referencia = self._obter_referencia_canal(canal)
         coluna = self._encontrar_coluna(configuracao["aliases"])
         resultado: dict[str, Any] = {
             "descricao": configuracao["descricao"],
             "coluna_csv": coluna,
             "unidade": configuracao["unidade"],
-            "referencia_adulto": configuracao["referencia"],
-            "fonte": configuracao["fonte"],
+            "fonte": referencia["fonte"],
         }
 
         if coluna is None:
@@ -187,18 +287,28 @@ class GeradorRelatorios:
         except (KeyError, TypeError, ValueError):
             idade = None
 
-        if idade is None or pd.isna(idade) or idade < 18:
+        if idade is None or pd.isna(idade):
             resultado.update(
                 status="Não avaliado",
                 observacao=(
-                    "As referências configuradas são para adultos; "
-                    "não foi aplicada uma faixa pediátrica."
+                    "Não foi possível aplicar as faixas de referência porque a idade "
+                    "do paciente não foi informada."
                 ),
             )
             return resultado
 
-        minimo = configuracao["minimo"]
-        maximo = configuracao["maximo"]
+        minimo = referencia["minimo"]
+        maximo = referencia["maximo"]
+        if minimo is None or maximo is None:
+            resultado.update(
+                status="Não avaliado",
+                observacao=(
+                    "As referências do arquivo de configuração não possuem faixa de "
+                    "aplicação válida para esse sinal."
+                ),
+            )
+            return resultado
+
         fora_da_faixa = (valores < minimo) | (valores > maximo)
         if configuracao.get("limite_superior_exclusivo"):
             fora_da_faixa = (valores < minimo) | (valores >= maximo)
@@ -210,14 +320,15 @@ class GeradorRelatorios:
             status = "Alterada"
             observacao = (
                 f"{quantidade_fora} de {total} valores ({percentual_fora:.1f}%) "
-                "ficaram fora da faixa de referência informada. "
+                f"ficaram fora da faixa de referência informada ({minimo} a {maximo} {configuracao['unidade']}). "
                 "Isso é uma sinalização automatizada, não um diagnóstico."
             )
         else:
             status = "Normal"
             observacao = (
                 "Todos os valores disponíveis ficaram dentro da faixa de "
-                "referência informada; isso não substitui avaliação clínica."
+                f"referência informada ({minimo} a {maximo} {configuracao['unidade']}); "
+                "isso não substitui avaliação clínica."
             )
 
         resultado.update(status=status, observacao=observacao)

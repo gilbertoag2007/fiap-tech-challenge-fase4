@@ -40,8 +40,29 @@
     return response.data;
   }
 
+  async function buscarTabelaReferenciaSinalVital(sinal) {
+    const response = await window.apiClient.get(
+      window.VITAL_SIGNS_REFERENCE_ENDPOINT,
+      {
+        params: { sinal },
+      },
+    );
+
+    if (
+      response.data === null ||
+      typeof response.data !== "object" ||
+      response.data.tabela === null ||
+      typeof response.data.tabela !== "object"
+    ) {
+      throw new window.ApiError("invalid-response");
+    }
+
+    return response.data.tabela;
+  }
+
   window.sinaisVitaisService = {
     buscarSinaisVitais,
     buscarRelatorioSinaisVitais,
+    buscarTabelaReferenciaSinalVital,
   };
 })();

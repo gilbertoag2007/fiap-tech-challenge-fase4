@@ -44,6 +44,28 @@ def listar_pacientes() -> list[dict[str, Any]]:
     return _criar_servico().listar_pacientes()
 
 
+@roteador.get("/tabela-referencia")
+def recuperar_tabela_referencia(
+    sinal: str | None = Query(default=None),
+) -> dict[str, Any]:
+    servico = _criar_servico()
+    if sinal is None or not sinal.strip():
+        return {"sinais_vitais": servico.listar_tabelas_referencia()}
+
+    try:
+        tabela = servico.recuperar_tabela_referencia(sinal)
+    except ValueError as error:
+        raise HTTPException(
+            status_code=404,
+            detail="Tabela de referência não localizada para o sinal informado.",
+        ) from error
+
+    return {
+        "sinal": sinal.strip(),
+        "tabela": tabela,
+    }
+
+
 @roteador.get("/relatorio")
 def recuperar_relatorio(
     cpf: str | None = Query(default=None),
