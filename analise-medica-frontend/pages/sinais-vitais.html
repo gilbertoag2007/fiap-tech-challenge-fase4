@@ -115,6 +115,8 @@
 
           <section class="patient-details d-none" id="patient-details" aria-label="Identificação do paciente selecionado" aria-live="polite"></section>
 
+          <section class="analysis-summary d-none" id="analysis-summary" aria-live="polite"></section>
+
           <section class="monitoring-placeholder vital-signs-placeholder" id="vital-signs-placeholder" aria-label="Área reservada para os sinais vitais" aria-live="polite">
             <div class="placeholder-content">
               <span class="placeholder-icon" aria-hidden="true"><i class="bi bi-activity"></i></span>
@@ -151,6 +153,7 @@
                     </div>
                     <div class="chart-canvas-wrap"><canvas id="chart-hr" role="img" aria-label="Gráfico de frequência cardíaca"></canvas></div>
                     <p class="chart-card-note d-none" id="note-hr"></p>
+                    <div class="chart-result d-none" id="result-hr"></div>
                   </div>
                   <footer class="chart-card-footer" id="period-hr">Tempo decorrido</footer>
                 </article>
@@ -164,6 +167,7 @@
                     </div>
                     <div class="chart-canvas-wrap"><canvas id="chart-spo2" role="img" aria-label="Gráfico de saturação de oxigênio"></canvas></div>
                     <p class="chart-card-note d-none" id="note-spo2"></p>
+                    <div class="chart-result d-none" id="result-spo2"></div>
                   </div>
                   <footer class="chart-card-footer" id="period-spo2">Tempo decorrido</footer>
                 </article>
@@ -177,6 +181,7 @@
                     </div>
                     <div class="chart-canvas-wrap"><canvas id="chart-nbps" role="img" aria-label="Gráfico de pressão arterial sistólica"></canvas></div>
                     <p class="chart-card-note d-none" id="note-nbps"></p>
+                    <div class="chart-result d-none" id="result-nbps"></div>
                   </div>
                   <footer class="chart-card-footer" id="period-nbps">Tempo decorrido</footer>
                 </article>
@@ -190,6 +195,7 @@
                     </div>
                     <div class="chart-canvas-wrap"><canvas id="chart-nbpd" role="img" aria-label="Gráfico de pressão arterial diastólica"></canvas></div>
                     <p class="chart-card-note d-none" id="note-nbpd"></p>
+                    <div class="chart-result d-none" id="result-nbpd"></div>
                   </div>
                   <footer class="chart-card-footer" id="period-nbpd">Tempo decorrido</footer>
                 </article>
@@ -203,6 +209,7 @@
                     </div>
                     <div class="chart-canvas-wrap"><canvas id="chart-pulse" role="img" aria-label="Gráfico de frequência do pulso periférico"></canvas></div>
                     <p class="chart-card-note d-none" id="note-pulse"></p>
+                    <div class="chart-result d-none" id="result-pulse"></div>
                   </div>
                   <footer class="chart-card-footer" id="period-pulse">Tempo decorrido</footer>
                 </article>
@@ -216,6 +223,7 @@
                     </div>
                     <div class="chart-canvas-wrap"><canvas id="chart-resp" role="img" aria-label="Gráfico de frequência respiratória"></canvas></div>
                     <p class="chart-card-note d-none" id="note-resp"></p>
+                    <div class="chart-result d-none" id="result-resp"></div>
                   </div>
                   <footer class="chart-card-footer" id="period-resp">Tempo decorrido</footer>
                 </article>

@@ -6,6 +6,7 @@
 
   const patientSelect = document.getElementById("patient-select");
   const patientDetails = document.getElementById("patient-details");
+  const analysisSummary = document.getElementById("analysis-summary");
   const loadingAlert = document.getElementById("patient-loading");
   const errorAlert = document.getElementById("patient-error");
   const errorMessage = document.getElementById("patient-error-message");
@@ -59,7 +60,7 @@
       color: "#d97706",
     },
     {
-      code: "Pulse",
+      code: "PULSE",
       name: "Frequência do pulso periférico",
       unit: "bpm",
       header: "PULSE",
@@ -68,7 +69,7 @@
       color: "#198754",
     },
     {
-      code: "Resp",
+      code: "RESP",
       name: "Frequência respiratória",
       unit: "rpm",
       header: "RESP",
@@ -82,6 +83,137 @@
 
   function normalize(value) {
     return value.trim().toLocaleLowerCase("pt-BR");
+  }
+
+  function getStatusTone(status) {
+    if (!status) {
+      return "neutral";
+    }
+
+    const normalized = String(status).trim().toLocaleLowerCase("pt-BR");
+    if (normalized.includes("normal")) {
+      return "ok";
+    }
+    if (normalized.includes("alter")) {
+      return "alert";
+    }
+    return "neutral";
+  }
+
+  function renderIndicatorSummary(definition, indicatorData) {
+    const container = document.getElementById(`result-${definition.key}`);
+    if (!container) {
+      return;
+    }
+
+    if (!indicatorData) {
+      container.classList.add("d-none");
+      container.replaceChildren();
+      return;
+    }
+
+    const status = String(indicatorData.status || "Sem avaliação").trim();
+    const tone = getStatusTone(status);
+    const header = document.createElement("div");
+    header.className = "chart-result-header";
+
+    const title = document.createElement("span");
+    title.className = "chart-result-title";
+    title.textContent = indicatorData.descricao || definition.name;
+
+    const badge = document.createElement("span");
+    badge.className = `chart-result-status status-${tone}`;
+    badge.textContent = status || "Sem avaliação";
+
+    header.append(title, badge);
+
+    const description = document.createElement("p");
+    description.className = "chart-result-description";
+    description.textContent = `${definition.name} · ${definition.unit}`;
+
+    const observation = document.createElement("p");
+    observation.className = "chart-result-observation";
+    observation.textContent =
+      indicatorData.observacao || "Sem observação adicional para este indicador.";
+
+    container.replaceChildren(header, description, observation);
+    container.classList.remove("d-none");
+  }
+
+  function renderAnalysisSummary(relatorio) {
+    if (!relatorio || typeof relatorio !== "object") {
+      analysisSummary.classList.add("d-none");
+      analysisSummary.replaceChildren();
+      return;
+    }
+
+    const indicadores = relatorio.sinais_vitais || {};
+    const normalCount = Object.values(indicadores).filter((item) =>
+      String(item?.status || "")
+        .trim()
+        .toLocaleLowerCase("pt-BR")
+        .includes("normal"),
+    ).length;
+    const alteredCount = Object.values(indicadores).filter((item) =>
+      String(item?.status || "")
+        .trim()
+        .toLocaleLowerCase("pt-BR")
+        .includes("alter"),
+    ).length;
+    const total = Object.keys(indicadores).length;
+    const duration =
+      relatorio.tempo_analisado?.duracao_formatada || "Não informado";
+    const patientName = relatorio.dados_do_paciente?.nome || "Paciente";
+
+    const card = document.createElement("article");
+    card.className = "analysis-summary-card";
+
+    const header = document.createElement("div");
+    header.className = "analysis-summary-header";
+
+    const title = document.createElement("h3");
+    title.textContent = `Resumo da análise — ${patientName}`;
+
+    const badge = document.createElement("span");
+    badge.className = `analysis-status-badge status-${
+      alteredCount > 0 ? "alert" : "ok"
+    }`;
+    badge.textContent =
+      alteredCount > 0
+        ? `${alteredCount} indicadores alterados`
+        : "Sem alterações relevantes";
+
+    header.append(title, badge);
+
+    const metrics = document.createElement("div");
+    metrics.className = "analysis-summary-grid";
+
+    const metricsDefinition = [
+      { label: "Total", value: total },
+      { label: "Normais", value: normalCount },
+      { label: "Alterados", value: alteredCount },
+      { label: "Duração", value: duration },
+    ];
+
+    metricsDefinition.forEach(({ label, value }) => {
+      const metric = document.createElement("div");
+      metric.className = "analysis-metric";
+
+      const metricLabel = document.createElement("span");
+      metricLabel.className = "analysis-metric-label";
+      metricLabel.textContent = label;
+
+      const metricValue = document.createElement("span");
+      metricValue.className = "analysis-metric-value";
+      metricValue.textContent = String(value);
+
+      metric.append(metricLabel, metricValue);
+      metrics.append(metric);
+    });
+
+    card.append(header, metrics);
+    analysisSummary.replaceChildren(card);
+    analysisSummary.classList.remove("d-none");
   }
 
   function showPatientError(error) {
@@ -121,11 +253,18 @@
     vitalSignsIncomplete.classList.add("d-none");
     vitalSignsIncomplete.textContent = "";
     vitalSignsChartGrid.classList.remove("d-none");
+    analysisSummary.classList.add("d-none");
+    analysisSummary.replaceChildren();
 
     vitalDefinitions.forEach((definition) => {
       document.getElementById(`note-${definition.key}`).classList.add("d-none");
       document.getElementById(`period-${definition.key}`).textContent =
         "Tempo decorrido";
+      const result = document.getElementById(`result-${definition.key}`);
+      if (result) {
+        result.classList.add("d-none");
+        result.replaceChildren();
+      }
     });
   }
 
@@ -292,9 +431,16 @@
       .join(":");
   }
 
-  function renderVitalSigns(parsedCsv) {
+  function renderVitalSigns(parsedCsv, relatorio) {
     const { records, fieldByKey } = parsedCsv;
     vitalSignsChartGrid.classList.remove("d-none");
+
+    if (relatorio && relatorio.sinais_vitais) {
+      vitalDefinitions.forEach((definition) => {
+        const indicatorData = relatorio.sinais_vitais[definition.code];
+        renderIndicatorSummary(definition, indicatorData);
+      });
+    }
 
     if (!records.length) {
       vitalSignsChartGrid.classList.add("d-none");
@@ -376,17 +522,37 @@
       document.getElementById(`note-${definition.key}`).classList.add("d-none");
       document.getElementById(`period-${definition.key}`).textContent =
         "Tempo decorrido";
+      const result = document.getElementById(`result-${definition.key}`);
+      if (result) {
+        result.classList.add("d-none");
+        result.replaceChildren();
+      }
     });
 
     try {
-      const csv = await window.sinaisVitaisService.buscarSinaisVitais(patient.id);
+      const [csvResult, relatorioResult] = await Promise.allSettled([
+        window.sinaisVitaisService.buscarSinaisVitais(patient.id),
+        window.sinaisVitaisService.buscarRelatorioSinaisVitais(patient.id),
+      ]);
+
       if (requestId !== vitalSignsRequest) {
         return;
       }
 
-      const parsedCsv = parseVitalSignsCsv(csv);
+      if (relatorioResult.status === "fulfilled") {
+        renderAnalysisSummary(relatorioResult.value);
+      } else {
+        analysisSummary.classList.add("d-none");
+        analysisSummary.replaceChildren();
+      }
+
+      if (csvResult.status !== "fulfilled") {
+        throw csvResult.reason;
+      }
+
+      const parsedCsv = parseVitalSignsCsv(csvResult.value);
       vitalSignsLoading.classList.add("d-none");
-      renderVitalSigns(parsedCsv);
+      renderVitalSigns(parsedCsv, relatorioResult.status === "fulfilled" ? relatorioResult.value : null);
     } catch (error) {
       if (requestId !== vitalSignsRequest) {
         return;

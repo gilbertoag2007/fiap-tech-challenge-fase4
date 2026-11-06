@@ -1,4 +1,14 @@
 (function () {
+  function isRelatorioValido(relatorio) {
+    return (
+      relatorio !== null &&
+      typeof relatorio === "object" &&
+      relatorio.dados_do_paciente !== undefined &&
+      relatorio.sinais_vitais !== undefined &&
+      typeof relatorio.sinais_vitais === "object"
+    );
+  }
+
   async function buscarSinaisVitais(idPaciente) {
     const response = await window.apiClient.get(
       window.VITAL_SIGNS_ENDPOINT,
@@ -15,5 +25,23 @@
     return response.data;
   }
 
-  window.sinaisVitaisService = { buscarSinaisVitais };
+  async function buscarRelatorioSinaisVitais(idPaciente) {
+    const response = await window.apiClient.get(
+      window.VITAL_SIGNS_REPORT_ENDPOINT,
+      {
+        params: { id: idPaciente },
+      },
+    );
+
+    if (!isRelatorioValido(response.data)) {
+      throw new window.ApiError("invalid-response");
+    }
+
+    return response.data;
+  }
+
+  window.sinaisVitaisService = {
+    buscarSinaisVitais,
+    buscarRelatorioSinaisVitais,
+  };
 })();
