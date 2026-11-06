@@ -1,13 +1,12 @@
 from pathlib import Path
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, Query, Response
+from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
 from integrations.integracao_physionet import ErroRegistroExterno
 from services.sinais_vitais_service import (
-    GraficosNaoLocalizadosError,
     PacienteNaoLocalizadoError,
     RelatorioNaoLocalizadoError,
     SinaisVitaisDetalhadosNaoLocalizadosError,
@@ -88,39 +87,6 @@ def recuperar_relatorio(
             status_code=404,
             detail="Relatório não localizado.",
         ) from error
-
-
-@roteador.get("/graficos")
-def recuperar_graficos(
-    cpf: str | None = Query(default=None),
-    id_registro: str | None = Query(default=None, alias="id"),
-) -> Response:
-    cpf = cpf.strip() if cpf and cpf.strip() else None
-    id_registro = (
-        id_registro.strip() if id_registro and id_registro.strip() else None
-    )
-    if cpf is None and id_registro is None:
-        raise HTTPException(
-            status_code=422,
-            detail="Informe ao menos um dos parâmetros: cpf ou id.",
-        )
-
-    try:
-        conteudo_zip, nome_arquivo = _criar_servico().recuperar_graficos_zip(
-            cpf,
-            id_registro,
-        )
-    except GraficosNaoLocalizadosError as error:
-        raise HTTPException(
-            status_code=404,
-            detail="Gráficos não localizados para o paciente informado.",
-        ) from error
-
-    return Response(
-        content=conteudo_zip,
-        media_type="application/zip",
-        headers={"Content-Disposition": f'attachment; filename="{nome_arquivo}"'},
-    )
 
 
 @roteador.get("/datalhamento")

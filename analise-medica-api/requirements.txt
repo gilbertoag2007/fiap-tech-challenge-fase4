@@ -2,4 +2,3 @@ fastapi
 uvicorn[standard]
 wfdb
 pandas
-matplotlib

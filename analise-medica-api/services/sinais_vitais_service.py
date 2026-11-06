@@ -1,11 +1,8 @@
 import json
 from datetime import datetime
-from io import BytesIO
 from pathlib import Path
 from typing import Any
-from zipfile import ZIP_DEFLATED, ZipFile
 
-from integrations.gerador_graficos import GeradorGraficos
 from integrations.integracao_physionet import IntegracaoPhysioNet
 from services.gerador_relatorios import GeradorRelatorios
 
@@ -15,10 +12,6 @@ class PacienteNaoLocalizadoError(Exception):
 
 
 class RelatorioNaoLocalizadoError(Exception):
-    pass
-
-
-class GraficosNaoLocalizadosError(Exception):
     pass
 
 
@@ -191,30 +184,6 @@ class ServicoSinaisVitais:
         with relatorios[-1].open(encoding="utf-8") as arquivo_relatorio:
             return json.load(arquivo_relatorio)
 
-    def recuperar_graficos_zip(
-        self,
-        cpf: str | None = None,
-        id_registro: str | None = None,
-    ) -> tuple[bytes, str]:
-        paciente = self._buscar_paciente_por_identificadores(cpf, id_registro)
-        if paciente is None:
-            raise GraficosNaoLocalizadosError
-
-        nome_paciente = "_".join(str(paciente["nome"]).upper().split())
-        diretorio_paciente = self.diretorio_saida / nome_paciente
-        graficos = self._arquivos_mais_recentes(diretorio_paciente, "*.png")
-        if not graficos:
-            raise GraficosNaoLocalizadosError
-
-        conteudo_zip = BytesIO()
-        with ZipFile(conteudo_zip, mode="w", compression=ZIP_DEFLATED) as arquivo_zip:
-            for grafico in graficos:
-                arquivo_zip.write(grafico, arcname=grafico.name)
-
-        data_hora_execucao = graficos[0].parent.name
-        nome_arquivo = f"GRAFICOS_{nome_paciente}_{data_hora_execucao}.zip"
-        return conteudo_zip.getvalue(), nome_arquivo
-
     def recuperar_csv(self, cpf: str, id_registro: str) -> Path:
         paciente = self._buscar_paciente_por_identificadores(cpf, id_registro)
         if paciente is None:
@@ -233,7 +202,6 @@ class ServicoSinaisVitais:
     def baixar_dados_paciente(self, id_registro: str) -> dict[str, Any]:
         paciente = self._buscar_paciente(id_registro)
         caminho_csv = self.integracao.baixar_csv(paciente, self.diretorio_saida)
-        GeradorGraficos().gerar(caminho_csv, paciente)
         caminho_relatorio = GeradorRelatorios(
             paciente,
             caminho_csv,
