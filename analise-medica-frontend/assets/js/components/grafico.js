@@ -13,6 +13,12 @@
       .join(":");
   }
 
+  function formatDateTime(dateTime) {
+    const [date, time] = dateTime.split(" ");
+    const [year, month, day] = date.split("-");
+    return `${day}/${month}/${year} ${time}`;
+  }
+
   function criarGrafico(configuration) {
     const canvas = document.getElementById(configuration.canvasId);
     if (!canvas) {
@@ -62,13 +68,19 @@
                   return "";
                 }
 
+                const { dateTime } = items[0].raw;
                 return [
-                  "Data: não informada pelo CSV",
+                  dateTime
+                    ? `Data e hora: ${formatDateTime(dateTime)}`
+                    : "Data: não informada pelo CSV",
                   `Tempo decorrido: ${formatElapsedTime(items[0].parsed.x)}`,
                 ];
               },
               label(context) {
-                return `${configuration.name}: ${context.parsed.y} ${configuration.unit}`;
+                const estimativa = context.raw.interpolated
+                  ? " (estimado por interpolação)"
+                  : "";
+                return `${configuration.name}: ${context.parsed.y} ${configuration.unit}${estimativa}`;
               },
             },
           },

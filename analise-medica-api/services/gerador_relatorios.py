@@ -203,7 +203,15 @@ class GeradorRelatorios:
                 "observacao": "O CSV não contém a coluna tempo_segundos.",
             }
 
-        tempos = pd.to_numeric(self.df[coluna_tempo], errors="coerce").dropna()
+        tempos = pd.to_numeric(self.df[coluna_tempo], errors="coerce")
+        if tempos.notna().any():
+            tempos = tempos.dropna()
+        else:
+            timestamps = pd.to_datetime(self.df[coluna_tempo], errors="coerce").dropna()
+            if not timestamps.empty:
+                tempos = (timestamps - timestamps.min()).dt.total_seconds()
+            else:
+                tempos = tempos.dropna()
         if tempos.empty:
             return {
                 "duracao_segundos": None,
@@ -265,7 +273,18 @@ class GeradorRelatorios:
             )
             return resultado
 
-        valores = pd.to_numeric(self.df[coluna], errors="coerce").dropna()
+        valores = pd.to_numeric(self.df[coluna], errors="coerce")
+        coluna_interpolada = f"{coluna}__interpolado"
+        if coluna_interpolada in self.df.columns:
+            estimados = (
+                self.df[coluna_interpolada]
+                .astype(str)
+                .str.strip()
+                .str.casefold()
+                .isin({"true", "1", "yes", "sim"})
+            )
+            valores = valores[~estimados]
+        valores = valores.dropna()
         if valores.empty:
             resultado.update(
                 status="Não disponível",

@@ -39,6 +39,8 @@ parâmetro `id` correspondem ao contrato atual da API. O endpoint aceita também
 O parser reconhece os cabeçalhos `tempo_segundos`, `HR`, `PULSE`, `NBP Sys`,
 `NBP Dias`, `RESP` e `SpO2`, detectando o delimitador vírgula ou ponto e vírgula.
 Campos numéricos vazios permanecem sem valor; linhas sem tempo válido são
-ignoradas. Os CSVs atuais registram `tempo_segundos` (tempo decorrido), não uma
-data/hora absoluta. Por isso, o eixo e os tooltips mostram o tempo decorrido e
-indicam que a data não é fornecida pelo arquivo.
+ignoradas. A coluna `tempo_segundos` aceita segundos decorridos em CSVs antigos
+ou timestamps no formato `AAAA-MM-DD HH:MM:SS.ffffff`. Nos CSVs com timestamp,
+o tooltip mostra a data e hora do registro em `dd/mm/yyyy hh:mm:ss` ao passar
+o mouse; o eixo continua exibindo o tempo decorrido desde o início do exame.
+Valores interpolados são identificados no tooltip como estimativas.

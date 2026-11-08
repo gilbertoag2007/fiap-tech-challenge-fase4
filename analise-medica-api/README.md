@@ -79,6 +79,13 @@ Envie uma requisição `POST` para `/v1/sinais-vitais/` com o ID cadastrado:
 O CSV e o relatório JSON de anomalias são salvos em
 `data/<NOME_DO_PACIENTE>/<YYYYMMDD_HHMMSS>/`. O relatório é calculado a partir
 do CSV, seguindo as mesmas faixas e regras do gerador de relatórios do projeto.
+Todas as lacunas dos sinais numéricos são preenchidas por interpolação linear;
+lacunas nas extremidades recebem o valor observado mais próximo. Sinais sem
+nenhuma medição permanecem vazios por não haver referência para estimativa.
+Cada sinal interpolado tem uma coluna `<nome_do_sinal>__interpolado` com
+`True` nos valores estimados. Esses valores são exibidos nos gráficos como
+estimativas e não são considerados nas estatísticas ou classificações do
+relatório.
 Se o registro não estiver em `data/pacientes.json`, a API responde com HTTP 404
 e a mensagem `Paciente não localizado`. Falhas ao consultar o PhysioNet
 retornam HTTP 502.

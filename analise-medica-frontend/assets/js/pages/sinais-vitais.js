@@ -453,6 +453,49 @@
     return Number.isFinite(number) ? number : null;
   }
 
+  function parseTimeValue(value) {
+    const text = String(value ?? "").trim();
+    const seconds = parseNumericValue(text);
+    if (seconds !== null) {
+      return { seconds, dateTime: null };
+    }
+
+    const match = text.match(
+      /^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2}):(\d{2})(?:\.(\d+))?$/,
+    );
+    if (!match) {
+      return null;
+    }
+
+    const [, yearText, monthText, dayText, hourText, minuteText, secondText, fraction = ""] =
+      match;
+    const [year, month, day, hour, minute, second] = [
+      yearText,
+      monthText,
+      dayText,
+      hourText,
+      minuteText,
+      secondText,
+    ].map(Number);
+    const timestamp = Date.UTC(year, month - 1, day, hour, minute, second);
+    const date = new Date(timestamp);
+    if (
+      date.getUTCFullYear() !== year ||
+      date.getUTCMonth() !== month - 1 ||
+      date.getUTCDate() !== day ||
+      date.getUTCHours() !== hour ||
+      date.getUTCMinutes() !== minute ||
+      date.getUTCSeconds() !== second
+    ) {
+      return null;
+    }
+
+    return {
+      seconds: timestamp / 1000 + (fraction ? Number(`0.${fraction}`) : 0),
+      dateTime: `${yearText}-${monthText}-${dayText} ${hourText}:${minuteText}:${secondText}`,
+    };
+  }
+
   function parseVitalSignsCsv(csv) {
     if (!csv.trim()) {
       return {
@@ -483,34 +526,69 @@
         normalizedFields.get(normalizeHeader(definition.header)),
       ]),
     );
+    const interpolatedFieldByKey = new Map(
+      vitalDefinitions.map((definition) => {
+        const field = normalizedFields.get(normalizeHeader(definition.header));
+        return [
+          definition.key,
+          field
+            ? normalizedFields.get(normalizeHeader(`${field}__interpolado`))
+            : undefined,
+        ];
+      }),
+    );
     const records = [];
+    let hasDateTime;
     let invalidRows = 0;
     let invalidMeasurements = 0;
 
     parsed.data.forEach((row) => {
-      const seconds = parseNumericValue(row[timeField]);
-      if (seconds === null || seconds < 0) {
+      const time = parseTimeValue(row[timeField]);
+      if (
+        time === null ||
+        (time.dateTime === null && time.seconds < 0) ||
+        (hasDateTime !== undefined && hasDateTime !== (time.dateTime !== null))
+      ) {
         invalidRows += 1;
         return;
       }
+      hasDateTime = time.dateTime !== null;
 
       const values = {};
+      const interpolated = {};
       fieldByKey.forEach((field, key) => {
         if (!field) {
           values[key] = null;
+          interpolated[key] = false;
           return;
         }
 
         const rawValue = row[field];
         values[key] = parseNumericValue(rawValue);
+        const interpolationField = interpolatedFieldByKey.get(key);
+        interpolated[key] = Boolean(
+          interpolationField && row[interpolationField] === "True",
+        );
         if (String(rawValue ?? "").trim() && values[key] === null) {
           invalidMeasurements += 1;
         }
       });
 
-      records.push({ seconds, values });
+      records.push({
+        seconds: time.seconds,
+        dateTime: time.dateTime,
+        values,
+        interpolated,
+      });
     });
 
+    if (hasDateTime) {
+      const firstTimestamp = records[0]?.seconds ?? 0;
+      records.forEach((record) => {
+        record.seconds =
+          Math.round((record.seconds - firstTimestamp) * 1_000_000) / 1_000_000;
+      });
+    }
     records.sort((first, second) => first.seconds - second.seconds);
     if (invalidRows || invalidMeasurements || parsed.errors.length) {
       console.warn("CSV de sinais vitais processado com registros ignorados.", {
@@ -582,6 +660,8 @@
       const points = records.map((record) => ({
         x: record.seconds,
         y: record.values[definition.key],
+        dateTime: record.dateTime,
+        interpolated: record.interpolated[definition.key],
       }));
       const pointCount = points.reduce(
         (count, point) => count + (point.y === null ? 0 : 1),
