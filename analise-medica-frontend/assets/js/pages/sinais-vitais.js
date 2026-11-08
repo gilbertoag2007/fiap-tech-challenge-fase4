@@ -293,14 +293,14 @@
 
     const metricsDefinition = [
       { label: "Total", value: total },
-      { label: "Normais", value: normalCount },
-      { label: "Alterados", value: alteredCount },
+      { label: "Normais", value: normalCount, tone: "ok" },
+      { label: "Alterados", value: alteredCount, tone: "alert" },
       { label: "Duração", value: duration },
     ];
 
-    metricsDefinition.forEach(({ label, value }) => {
+    metricsDefinition.forEach(({ label, value, tone }) => {
       const metric = document.createElement("div");
-      metric.className = "analysis-metric";
+      metric.className = `analysis-metric${tone ? ` analysis-metric-${tone}` : ""}`;
 
       const metricLabel = document.createElement("span");
       metricLabel.className = "analysis-metric-label";
