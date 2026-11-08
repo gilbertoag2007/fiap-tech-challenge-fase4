@@ -1,3 +1,0 @@
-wfdb
-pandas
-matplotlib
