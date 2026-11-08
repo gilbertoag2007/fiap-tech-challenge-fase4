@@ -122,7 +122,7 @@
 
     const title = document.createElement("span");
     title.className = "chart-result-title";
-    title.textContent = indicatorData?.descricao || definition.name;
+    title.textContent = `${indicatorData?.descricao || definition.name} · ${definition.unit}`;
 
     header.append(title);
     if (indicatorData) {
@@ -133,15 +133,17 @@
       header.append(badge);
     }
 
-    const description = document.createElement("p");
-    description.className = "chart-result-description";
-    description.textContent = `${definition.name} · ${definition.unit}`;
-    container.replaceChildren(header, description);
-    if (indicatorData?.observacao) {
+    container.replaceChildren(header);
+    const analysisText = indicatorData?.analise_ia || indicatorData?.observacao;
+    if (analysisText) {
+      const analysisTitle = document.createElement("h4");
+      analysisTitle.className = "chart-result-analysis-title";
+      analysisTitle.textContent =
+        "Resultado da Análise (Analisado com Inteligência Artificial)";
       const observation = document.createElement("p");
       observation.className = "chart-result-observation";
-      observation.textContent = indicatorData.observacao;
-      container.append(observation);
+      observation.textContent = analysisText;
+      container.append(analysisTitle, observation);
     }
 
     const referenceDetails = document.createElement("details");
@@ -263,6 +265,12 @@
         .toLocaleLowerCase("pt-BR")
         .includes("alter"),
     ).length;
+    const hasClassification = Object.values(indicadores).some((item) => {
+      const status = String(item?.status || "")
+        .trim()
+        .toLocaleLowerCase("pt-BR");
+      return status.includes("normal") || status.includes("alter");
+    });
     const total = Object.keys(indicadores).length;
     const duration =
       relatorio.tempo_analisado?.duracao_formatada || "Não informado";
@@ -279,12 +287,14 @@
 
     const badge = document.createElement("span");
     badge.className = `analysis-status-badge status-${
-      alteredCount > 0 ? "alert" : "ok"
+      alteredCount > 0 ? "alert" : hasClassification ? "ok" : "neutral"
     }`;
     badge.textContent =
       alteredCount > 0
         ? `${alteredCount} indicadores alterados`
-        : "Sem alterações relevantes";
+        : hasClassification
+          ? "Sem alterações relevantes"
+          : "Aguardando interpretação";
 
     header.append(title, badge);
 
@@ -293,8 +303,16 @@
 
     const metricsDefinition = [
       { label: "Total", value: total },
-      { label: "Normais", value: normalCount, tone: "ok" },
-      { label: "Alterados", value: alteredCount, tone: "alert" },
+      {
+        label: "Normais",
+        value: hasClassification ? normalCount : "—",
+        tone: hasClassification ? "ok" : undefined,
+      },
+      {
+        label: "Alterados",
+        value: hasClassification ? alteredCount : "—",
+        tone: hasClassification ? "alert" : undefined,
+      },
       { label: "Duração", value: duration },
     ];
 

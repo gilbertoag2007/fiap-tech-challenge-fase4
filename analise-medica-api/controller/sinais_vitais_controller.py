@@ -5,6 +5,10 @@ from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
+from integrations.integracao_openai import (
+    ErroAnaliseIA,
+    ErroConfiguracaoAnaliseIA,
+)
 from integrations.integracao_physionet import ErroRegistroExterno
 from services.sinais_vitais_service import (
     PacienteNaoLocalizadoError,
@@ -132,6 +136,16 @@ def baixar_sinais_vitais(requisicao: RequisicaoSinaisVitais) -> dict[str, Any]:
         return servico.baixar_dados_paciente(requisicao.id)
     except PacienteNaoLocalizadoError as error:
         raise HTTPException(status_code=404, detail="Paciente não localizado") from error
+    except ErroConfiguracaoAnaliseIA as error:
+        raise HTTPException(
+            status_code=503,
+            detail=str(error),
+        ) from error
+    except ErroAnaliseIA as error:
+        raise HTTPException(
+            status_code=502,
+            detail=str(error),
+        ) from error
     except ErroRegistroExterno as error:
         raise HTTPException(
             status_code=502,

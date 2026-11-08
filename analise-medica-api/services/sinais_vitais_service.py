@@ -3,6 +3,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from integrations.integracao_openai import IntegracaoOpenAI
 from integrations.integracao_physionet import IntegracaoPhysioNet
 from services.gerador_relatorios import GeradorRelatorios
 
@@ -34,10 +35,12 @@ class ServicoSinaisVitais:
         caminho_catalogo_pacientes: str | Path,
         diretorio_saida: str | Path,
         integracao: IntegracaoPhysioNet | None = None,
+        integracao_openai: IntegracaoOpenAI | None = None,
     ) -> None:
         self.caminho_catalogo_pacientes = Path(caminho_catalogo_pacientes)
         self.diretorio_saida = Path(diretorio_saida)
         self.integracao = integracao or IntegracaoPhysioNet()
+        self.integracao_openai = integracao_openai or IntegracaoOpenAI()
 
     def _carregar_referencias_sinais_vitais(self) -> dict[str, Any]:
         caminho_arquivo = self.diretorio_saida / "referencias_sinais_vitais.json"
@@ -201,11 +204,34 @@ class ServicoSinaisVitais:
 
     def baixar_dados_paciente(self, id_registro: str) -> dict[str, Any]:
         paciente = self._buscar_paciente(id_registro)
+        self.integracao_openai.verificar_configuracao()
         caminho_csv = self.integracao.baixar_csv(paciente, self.diretorio_saida)
-        caminho_relatorio = GeradorRelatorios(
+        gerador_relatorios = GeradorRelatorios(
             paciente,
             caminho_csv,
             caminho_csv.parent,
-        ).gerar_relatorio()
+        )
+        relatorio = gerador_relatorios.montar_relatorio()
+        analises_ia = self.integracao_openai.analisar_sinais_vitais(
+            paciente,
+            relatorio["sinais_vitais"],
+        )
+        for analise in analises_ia:
+            sinal = relatorio["sinais_vitais"][analise["sinal_vital"]]
+            sinal["status"] = analise["status"]
+            sinal["analise_ia"] = analise["analise_ia"]
+
+        caminho_relatorio = gerador_relatorios.salvar_relatorio(relatorio)
+        caminho_analise_ia = caminho_csv.parent / "ANALISE_IA_SINAIS_VITAIS.json"
+        with caminho_analise_ia.open("w", encoding="utf-8") as arquivo_analise:
+            json.dump(
+                analises_ia,
+                arquivo_analise,
+                ensure_ascii=False,
+                indent=2,
+                allow_nan=False,
+            )
+            arquivo_analise.write("\n")
+
         with caminho_relatorio.open(encoding="utf-8") as arquivo_relatorio:
             return json.load(arquivo_relatorio)

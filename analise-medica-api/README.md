@@ -68,6 +68,22 @@ responde com HTTP 404 e
 
 ### Baixar sinais vitais de um paciente
 
+### Configurar a análise com OpenAI
+
+Copie `.env.example` para `.env` na pasta `analise-medica-api` e informe sua
+chave em `OPENAI_API_KEY`. `OPENAI_MODEL` define o modelo (o padrão é
+`gpt-6-luna`) e `OPENAI_BASE_URL` define o endpoint da API. O arquivo `.env` é
+ignorado pelo Git; não versione sua chave. Instale as dependências atualizadas
+com `pip install -r requirements.txt`.
+
+Durante uma importação, a integração envia à OpenAI idade, sexo, histórico
+médico do cadastro e estatísticas resumidas dos sinais. Nome, CPF, identificador
+do paciente e CSV bruto não são enviados. O uso de dados clínicos em serviço
+externo deve estar autorizado e de acordo com os requisitos de privacidade da
+organização. A resposta é informativa, não substitui avaliação profissional.
+Sem chave configurada, a rota de importação responde HTTP 503; falhas da API ou
+uma resposta estruturada inválida respondem HTTP 502.
+
 Envie uma requisição `POST` para `/v1/sinais-vitais/` com o ID cadastrado:
 
 ```json
@@ -76,9 +92,12 @@ Envie uma requisição `POST` para `/v1/sinais-vitais/` com o ID cadastrado:
 }
 ```
 
-O CSV e o relatório JSON de anomalias são salvos em
+O CSV e o relatório JSON descritivo são salvos em
 `data/<NOME_DO_PACIENTE>/<YYYYMMDD_HHMMSS>/`. O relatório é calculado a partir
-do CSV, seguindo as mesmas faixas e regras do gerador de relatórios do projeto.
+do CSV, contém estatísticas descritivas dos sinais vitais e incorpora `status`
+e `analise_ia` de cada sinal. Uma lista com os campos `sinal_vital`, `status` e
+`analise_ia` também é salva em `ANALISE_IA_SINAIS_VITAIS.json` na pasta da
+execução.
 Todas as lacunas dos sinais numéricos são preenchidas por interpolação linear;
 lacunas nas extremidades recebem o valor observado mais próximo. Sinais sem
 nenhuma medição permanecem vazios por não haver referência para estimativa.
