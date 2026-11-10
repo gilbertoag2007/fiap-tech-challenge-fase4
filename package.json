@@ -1,0 +1,6 @@
+{
+  "name": "fiap-fase4-browser-tests",
+  "private": true,
+  "scripts": {"test:e2e": "node --test tests/browser/*.test.cjs"},
+  "devDependencies": {"playwright": "1.62.1"}
+}

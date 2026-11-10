@@ -1,5 +1,9 @@
 # analise-medica-api
 
+## Módulo de fisioterapia (Fase 4)
+
+A API também oferece análise de quatro exercícios do REHAB24-6 em `/v1/fisioterapia`, com YOLOv8 Pose, classificação por repetição e avaliação separada por participante. Consulte [preparação, execução, testes e limitações](../docs/fisioterapia/README.md). O processamento de vídeo exige Python 3.12 e as dependências de `requirements-video.txt`; `requirements-dev.txt` inclui os testes. A instalação original de sinais vitais abaixo continua disponível.
+
 API FastAPI para consultar o catálogo de pacientes, recuperar relatórios de sinais vitais e importar registros do PhysioNet para análise descritiva com suporte de IA.
 
 ## Visão geral

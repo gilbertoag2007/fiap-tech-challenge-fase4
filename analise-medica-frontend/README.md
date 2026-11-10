@@ -168,3 +168,6 @@ A aplicação principal de sinal vitals fica em:
 ```text
 http://127.0.0.1:5500/pages/sinais-vitais.html
 ```
+# Fisioterapia — Fase 4
+
+A página `pages/fisioterapia.html` integra os quatro exercícios REHAB24-6 à API `/v1/fisioterapia`. A preparação dos vídeos e dos modelos é necessária antes da análise. Consulte [o guia do módulo](../docs/fisioterapia/README.md) para instalação, comandos e testes.

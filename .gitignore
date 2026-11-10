@@ -1,0 +1,5 @@
+.superpowers/
+playwright-output/
+node_modules/
+__pycache__/
+.pytest_cache/
