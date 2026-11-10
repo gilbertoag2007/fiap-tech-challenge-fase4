@@ -16,7 +16,7 @@ Fonte: enunciado `IADT - Fase 4 - Tech challenge.pdf`, páginas 3–4, fornecido
 | Alertas automáticos para a equipe médica | Pendente |
 | Fusão multimodal e monitoramento em tempo real | Pendente |
 | Código completo em Git | Código, testes e documentação na branch feature/modal-video; revisão independente concluída; pesos YOLO e modelos treinados incluídos; vídeos e caches não são versionados |
-| Relatório técnico multimodal com modelos, resultados e exemplos | Pendente como entrega completa; guia, métricas, matrizes e limitações deste módulo estão documentados |
+| Relatório técnico multimodal com modelos, resultados e exemplos | Relatório técnico do estado atual em `docs/relatorio-tecnico-fase4.md` e PDF; resultados multimodais ainda dependem dos módulos pendentes |
 | Vídeo final até 15 min no YouTube/Vimeo | Ainda não confirmado/produzido nesta etapa |
 
 Não confundir segmentação fornecida pelo dataset com detecção automática de repetições, ou rótulos oficiais com resultados previstos. Também não confundir falha de marcador (`mocap_erroneous`) com exercício incorreto.
@@ -34,4 +34,4 @@ Não confundir segmentação fornecida pelo dataset com detecção automática d
 1. Melhorar e reavaliar a qualidade do Ex3 e a cobertura da câmera 18 em Ex1/Ex2, preservando uma avaliação independente para novas alegações. Os testes de engenharia aprovados não validam a qualidade clínica.
 2. Definir os dados e critérios ainda não especificados para áudio, prescrições, movimentação de internação e alertas; essas escolhas precisam ser esclarecidas com o usuário antes da implementação.
 3. Implementar e testar os módulos multimodais restantes e as integrações Azure.
-4. Consolidar o relatório técnico geral e produzir/publicar a demonstração de até 15 minutos solicitada no enunciado.
+4. Atualizar o relatório técnico com os futuros resultados multimodais e produzir/publicar a demonstração de até 15 minutos solicitada no enunciado.
