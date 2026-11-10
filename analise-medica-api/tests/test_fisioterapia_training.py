@@ -1,9 +1,11 @@
 import copy
+import os
 
 import pytest
 
+import fisioterapia.training as training
 from fisioterapia.training import grouped_folds, train_records, predict_rows, source_identity, repetition_rows
-from fisioterapia.config import digest
+from fisioterapia.config import digest, write_json
 
 
 def records():
@@ -95,6 +97,66 @@ def test_estimator_version_change_invalidates_training_source(tmp_path,monkeypat
     original = source_identity(tmp_path,catalog)
     monkeypatch.setattr(ultralytics,'__version__','test-new-version')
     assert source_identity(tmp_path,catalog) != original
+
+
+def portable_fixture(root):
+    (root/'downloads').mkdir()
+    (root/'downloads/Segmentation.csv').write_text('annotations')
+    (root/'models').mkdir()
+    (root/'models/yolov8n-pose.pt').write_bytes(b'weights-test')
+    (root/'videos').mkdir()
+    video_path = root/'videos/sample.mp4'
+    video_path.write_bytes(b'video-test')
+    catalog = {'videos':[{'id':'sample','relative_path':'videos/sample.mp4',
+                          'sha256':digest(video_path)}],
+               'annotation_sha256':digest(root/'downloads/Segmentation.csv')}
+    write_json(root/'catalog.json',catalog)
+    return catalog,video_path
+
+
+def test_deployment_identity_ignores_file_dates_and_device_but_checks_content(tmp_path):
+    catalog,video = portable_fixture(tmp_path)
+    identity_function = getattr(training,'deployment_identity',None)
+    assert callable(identity_function)
+    original = identity_function(tmp_path,catalog)
+    os.utime(video,ns=(1_800_000_000_000_000_000,)*2)
+    write_json(tmp_path/'runtime.json',{'device':'cpu','batch':1})
+    assert identity_function(tmp_path,catalog) == original
+    (tmp_path/'models/yolov8n-pose.pt').write_bytes(b'changed-weights')
+    assert identity_function(tmp_path,catalog) != original
+
+
+def test_published_experiment_survives_copy_with_new_mtime_and_runtime(tmp_path):
+    catalog,video = portable_fixture(tmp_path)
+    identity_function = getattr(training,'deployment_identity',None)
+    assert callable(identity_function)
+    published = {'identity':'published','source_identity':source_identity(tmp_path,catalog),
+                 'deployment_identity':identity_function(tmp_path,catalog)}
+    write_json(tmp_path/'experiment.json',published)
+    os.utime(video,ns=(1_800_000_000_000_000_000,)*2)
+    write_json(tmp_path/'runtime.json',{'device':'cpu','batch':1})
+    assert training.current_experiment(tmp_path)['identity'] == 'published'
+    (tmp_path/'downloads/Segmentation.csv').write_text('changed-annotations')
+    with pytest.raises(ValueError, match='anotações|desatualizado'):
+        training.current_experiment(tmp_path)
+
+
+def test_analysis_recomputes_when_pose_runtime_changes_without_retraining(tmp_path):
+    from fisioterapia.jobs import analysis_identity
+    catalog,video_path = portable_fixture(tmp_path)
+    video = dict(catalog['videos'][0],exercise_id=1,person_id=7)
+    model_path = tmp_path/'experiments/fold.joblib'
+    model_path.parent.mkdir()
+    model_path.write_bytes(b'model-test')
+    manifest = {'identity':'published','source_identity':source_identity(tmp_path,catalog),
+                'deployment_identity':training.deployment_identity(tmp_path,catalog),
+                'exercises':{'1':{'folds':[{'path':'experiments/fold.joblib',
+                                          'sha256':digest(model_path),'test_participants':[7]}]}}}
+    write_json(tmp_path/'experiment.json',manifest)
+    first = analysis_identity(tmp_path,video)
+    write_json(tmp_path/'runtime.json',{'device':'cpu','batch':2})
+    assert training.current_experiment(tmp_path)['identity'] == 'published'
+    assert analysis_identity(tmp_path,video) != first
 
 
 def test_source_one_based_frames_map_to_video_start_and_inclusive_end():

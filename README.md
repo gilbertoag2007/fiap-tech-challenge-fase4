@@ -9,7 +9,7 @@ Leia o [relatório técnico completo](docs/relatorio-tecnico-fase4.md) ([PDF](do
 | Área | Implementação | Estado da validação |
 |---|---|---|
 | Sinais vitais | Importação WFDB de um registro do catálogo, interpolação sinalizada, estatísticas de seis canais, análise informativa via OpenAI, CSV e JSON | Rotas e inicialização cobertas por testes de regressão; integração real PhysioNet/OpenAI e acerto clínico não foram avaliados neste repositório |
-| Fisioterapia | Ex1–Ex4 do REHAB24-6, duas câmeras, YOLOv8n Pose pré-treinado, medidas 2D, Random Forest por exercício, relatório por repetição e visualização | 94 vídeos/260.750 frames processados; avaliação por participante excluído do treino; 53 testes Python e 4 de navegador passaram na execução registrada |
+| Fisioterapia | Ex1–Ex4 do REHAB24-6, duas câmeras, YOLOv8n Pose pré-treinado, medidas 2D, Random Forest por exercício, relatório por repetição e visualização | 94 vídeos/260.750 frames processados; avaliação por participante excluído do treino; 56 testes Python e 4 de navegador passaram nas execuções registradas |
 
 No vídeo, a classificação é `Correto`, `Incorreto` ou `Não conclusivo`. A balanced accuracy medida foi 64,14% / 64,59% / **45,45%** / 73,40% para Ex1–Ex4, com cobertura 75,84% / 79,09% / 88,32% / 100%. O Ex3 tem qualidade insuficiente. O resultado é acadêmico, sem validação clínica.
 
@@ -86,17 +86,14 @@ Então abra a página ou consulte `GET /v1/sinais-vitais/relatorio?id=3000190n`.
 
 ## Preparar fisioterapia
 
-Os pesos oficiais YOLOv8 Pose e 20 classificadores experimentais já estão versionados. Os vídeos, anotações, catálogo, configuração de execução e caches de pose não estão. A identidade do experimento inclui metadados locais dos vídeos, versões e dispositivo/lote; por isso **clonar não garante que o classificador versionado seja aceito em outra máquina**. Para reproduzir a análise de ponta a ponta, dentro de `analise-medica-api`, com `.venv` ativo:
+Os pesos oficiais YOLOv8 Pose e 20 classificadores experimentais já estão versionados. Para usar esses modelos em outra máquina, **não é necessário treinar novamente**. Os vídeos e as anotações são obtidos do Zenodo; dentro de `analise-medica-api`, com `.venv` ativo, execute:
 
 ```sh
 python -m fisioterapia prepare
-python -m fisioterapia weights
-python -m fisioterapia extract --device cpu --batch 1
-python -m fisioterapia train
 python -m fisioterapia evaluate
 ```
 
-O comando `weights` valida/obtém os pesos quando necessário. `prepare` baixa e verifica o ZIP do [REHAB24-6](https://zenodo.org/records/13305826); `extract` gera a postura dos 94 vídeos; `train` ajusta os modelos por exercício/participante e publica o manifesto local; `evaluate` verifica o experimento atual e imprime as métricas já registradas. Em um Mac compatível, `extract --device mps --batch 8` foi a configuração da avaliação publicada. O processamento completo pode demorar bastante; a última retomada local consumiu 40 min 32 s **com caches anteriores reutilizados**, não equivale a um tempo de execução limpa. Consulte o [guia de vídeo](docs/fisioterapia/README.md) para parâmetros, integridade e caminhos alternativos.
+`prepare` baixa e verifica o ZIP do [REHAB24-6](https://zenodo.org/records/13305826), extrai Ex1–Ex4 e cria o catálogo. `evaluate` confere a compatibilidade dos dados, pesos e dependências com os modelos publicados. Em seguida, inicie API e frontend e selecione uma gravação: o YOLO gera a postura daquele vídeo na primeira análise e a classificação usa o modelo já versionado. A inferência pode demorar na CPU; análises posteriores reutilizam o cache. `extract` para todos os vídeos e `train` são opcionais para reproduzir o experimento, não passos de instalação. Consulte o [guia de vídeo](docs/fisioterapia/README.md) para parâmetros e integridade.
 
 O sistema aceita apenas as gravações catalogadas, das câmeras 17 e 18, e usa a segmentação oficial das repetições. Não há upload de vídeos novos ou descoberta automática do exercício. O YOLOv8 Pose extrai pontos corporais; o Random Forest treinado pelo projeto usa as medidas derivadas para prever correção.
 
@@ -134,7 +131,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-O último comando executa cenários controlados. Para incluir o cenário real dos quatro exercícios, prepare os dados/modelos, inicie a API local e execute `FIAP_REAL_API=1 npm run test:e2e` (POSIX). A evidência registrada da implementação foi **53 testes Python e quatro testes de navegador aprovados**; dois avisos upstream WFDB/pandas. Esses testes não medem acerto clínico da análise OpenAI nem validam os requisitos multimodais pendentes. Veja [resultados e matrizes](docs/fisioterapia/resultados.md).
+O último comando executa cenários controlados. Para incluir o cenário real dos quatro exercícios, prepare os dados/modelos, inicie a API local e execute `FIAP_REAL_API=1 npm run test:e2e` (POSIX). A verificação atual foi **56 testes Python aprovados**; a execução registrada de navegador teve quatro testes aprovados. Houve dois avisos upstream WFDB/pandas. Esses testes não medem acerto clínico da análise OpenAI nem validam os requisitos multimodais pendentes. Veja [resultados e matrizes](docs/fisioterapia/resultados.md).
 
 ## Licença de dados e limites
 

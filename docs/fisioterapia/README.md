@@ -15,29 +15,26 @@ python -m pip install -r requirements-video.lock.txt
 
 O lock registra o ambiente completo usado na verificação, incluindo testes. Para instalar somente o conjunto declarado de dependências do módulo, use `requirements-video.txt`; `requirements-dev.txt` inclui pytest/httpx. No Windows, ative com `.venv\Scripts\Activate.ps1`. O módulo de sinais vitais continua podendo iniciar com suas dependências originais em `requirements.txt`; o processamento de vídeo exige as dependências adicionais.
 
-## Preparação e processamento
+## Preparação para usar os modelos publicados
 
 Os comandos seguintes são executados dentro de `analise-medica-api`, com o ambiente virtual ativo:
 
 ```sh
 python -m fisioterapia prepare
-python -m fisioterapia weights
-python -m fisioterapia extract
-python -m fisioterapia train
 python -m fisioterapia evaluate
 ```
 
-O comando `prepare` baixa o pacote de vídeos completo (aproximadamente 2,7 GB) e as anotações, verifica os checksums publicados e extrai Ex1–Ex4. É necessário espaço adicional para os vídeos extraídos, o ambiente Python, caches e modelos. Uma interrupção do download deixa um arquivo `.part`, que não é tratado como válido sem a verificação de checksum.
+O comando `prepare` baixa o pacote de vídeos completo (aproximadamente 2,7 GB) e as anotações, verifica os checksums publicados e extrai Ex1–Ex4. `evaluate` confere a identidade portátil do experimento e exibe as métricas dos classificadores já incluídos no Git. **Não é necessário executar `train` para analisar os vídeos.** É necessário espaço adicional para os vídeos extraídos, o ambiente Python e os caches. Uma interrupção do download deixa um arquivo `.part`, que não é tratado como válido sem a verificação de checksum.
 
 O processamento usa CPU por padrão. Em um Mac compatível, a extração pode ser acelerada com:
 
 ```sh
-python -m fisioterapia extract --device mps --batch 8
+python -m fisioterapia extract --video-id ID --device mps --batch 8
 ```
 
-Essa escolha é persistida em `data/fisioterapia/runtime.json` e participa da identidade dos caches e dos experimentos. Para voltar à CPU, use `--device cpu --batch 1` e repita extração/treinamento. Em um host com GPU NVIDIA configurada, é possível usar `--device cuda:0`. Não existe requisito de GPU para iniciar a API ou consumir resultados já preparados.
+Essa escolha é persistida em `data/fisioterapia/runtime.json` e participa da identidade dos caches de postura; **não invalida os classificadores publicados**. Para voltar à CPU, use `--device cpu --batch 1`; o cache de postura do vídeo será recriado quando necessário. Em um host com GPU NVIDIA configurada, é possível usar `--device cuda:0`. Não existe requisito de GPU para iniciar a API.
 
-Extração e treinamento são preparações explícitas, não são disparados automaticamente pelo acesso à página. Caches válidos evitam nova inferência nos vídeos já processados. Para uma verificação técnica de um único vídeo, consulte seu identificador em `catalog.json` e use `extract --video-id ID`; isso não substitui a avaliação completa.
+A página não treina modelos. Ao solicitar a análise de uma gravação, a API extrai sua postura com YOLOv8 Pose se ainda não houver cache válido e usa o Random Forest publicado. Caches válidos evitam nova inferência nos vídeos já processados. Para reproduzir a avaliação inteira a partir dos dados originais, use `python -m fisioterapia extract`, depois `python -m fisioterapia train`; isso recria os 20 modelos e pode demorar. O comando `weights` só é necessário se o arquivo de pesos versionado estiver ausente.
 
 Todos os comandos aceitam `--root CAMINHO` para outro diretório de dados. Para a API usar o mesmo diretório, configure `FISIOTERAPIA_DATA_DIR`. Não misture extração/treinamento com um servidor fazendo análises no mesmo diretório.
 
@@ -129,9 +126,9 @@ Os pesos YOLO, os 20 classificadores treinados e seus manifestos foram incluído
 - `experiment.json`: manifesto do experimento ativo, versionado;
 - `jobs/` e `reports/`: tarefas e resultados da interface.
 
-Esta inclusão publica os artefatos já produzidos, sem alterar o fluxo de preparação ou a validação de compatibilidade. Clonar o repositório não baixa os vídeos nem instala dependências. O manifesto ainda valida versões, configuração de extração e metadados locais da mídia; uma cópia em outra máquina pode exigir regenerar o experimento. A instalação portátil sem retreinamento não foi implementada nesta alteração.
+O manifesto publicado contém uma identidade de implantação baseada no catálogo, hashes declarados das mídias, anotações, pesos, método de pose, esquema de features e versão do scikit-learn. Datas locais dos arquivos, dispositivo e lote não participam dessa identidade. Assim, depois de instalar as dependências e executar `prepare`, os classificadores versionados podem ser usados sem novo treino. O vídeo selecionado ainda é conferido por hash antes da inferência, e o modelo escolhido é conferido por hash antes de ser carregado. Clonar o repositório não baixa os vídeos nem instala dependências.
 
-Os modelos joblib são artefatos produzidos por este projeto, não entradas enviadas por usuários. Os hashes são conferidos antes de carregá-los. Alterações dos dados, pesos, versões e configurações exigem novo preparo/treino; não reutilize manualmente classificadores de outro experimento. A identidade compartilhada da engine inclui Ultralytics, PyTorch, OpenCV e política de rastreamento. Remover ou alterar um cache de postura invalida o resultado reutilizado. Após perda de associação por mais de 15 frames, o rastreador não assume que uma pessoa reaparecida é o mesmo participante; os frames restantes ficam sem postura associada.
+Os modelos joblib são artefatos produzidos por este projeto, não entradas enviadas por usuários. Os hashes são conferidos antes de carregá-los. Mudanças nos dados, pesos ou método podem invalidar o experimento e exigir nova preparação ou treino; mudanças de dispositivo/lote apenas recriam o cache de pose. A identidade do cache inclui Ultralytics, PyTorch, OpenCV e política de rastreamento. Remover ou alterar um cache de postura invalida o resultado reutilizado. Após perda de associação por mais de 15 frames, o rastreador não assume que uma pessoa reaparecida é o mesmo participante; os frames restantes ficam sem postura associada.
 
 ## Fonte e licença
 

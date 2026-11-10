@@ -1621,5 +1621,6 @@
     "Classificação acadêmica binária; não identifica tipo ou gravidade do erro.",
     "Intervalos de repetição fornecidos pelo dataset; não detectados automaticamente."
   ],
-  "duration_seconds": 3.563
+  "duration_seconds": 3.563,
+  "deployment_identity": "c7a33b7f263c2d84ef085c6051c77aea34c61fbae56222061050b8aff2b54972"
 }

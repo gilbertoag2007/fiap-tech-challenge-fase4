@@ -60,7 +60,7 @@ Somente casos classificáveis. Linhas representam o rótulo oficial; colunas, a 
 
 ## Evidência de engenharia e demonstração
 
-- **53 testes Python passaram**, com dois avisos de depreciação upstream WFDB/pandas. Incluem medidas, bordas/índices, dataset, agrupamento, predição sem rótulo, cache, falhas/reinício, API/Range/CORS e regressão das rotas de sinais vitais. O teste de inicialização também bloqueia explicitamente as bibliotecas opcionais de visão.
+- **56 testes Python passaram**, com dois avisos de depreciação upstream WFDB/pandas. Incluem medidas, bordas/índices, dataset, agrupamento, predição sem rótulo, portabilidade dos modelos, invalidação de análise por mudança de runtime, cache, falhas/reinício, API/Range/CORS e regressão das rotas de sinais vitais. O teste de inicialização também bloqueia explicitamente as bibliotecas opcionais de visão.
 - **Quatro testes de navegador passaram**, sem skips: três cenários controlados e um cenário real que percorreu os quatro exercícios. Houve reprodução de MP4 com busca temporal, navegação por repetição, download e validação do relatório; predições excluíram o participante do treino. Nenhum erro JavaScript não tratado foi observado nesses cenários.
 - Layout estreito verificado no cenário controlado. As quatro capturas reais desktop foram inspecionadas: `playwright-output/real-ex1.png` até `real-ex4.png` (artefatos locais ignorados pelo Git).
 - Na gravação PM_010/câmera 17, a demonstração mostrou 11/16 repetições não conclusivas; o sistema apresenta essa limitação. Nos vídeos de Ex1 e Ex2 há erros mesmo com boa cobertura. A referência oficial fica separada da predição na interface.
@@ -76,7 +76,7 @@ A última retomada da extração levou **2.432,4 s (40 min 32 s)**, reaproveitan
 
 Experimento: `873b859dc49577cef59b94af1255d9a2622abbff1295a8b0c010368651b44aa7`.
 
-Após a avaliação, os pesos YOLO, os 20 modelos treinados e seus manifestos foram incluídos no Git. Vídeos, downloads e caches de postura permanecem locais, ignorados pelo Git. A publicação dos artefatos não altera a validação de compatibilidade do experimento em outra máquina. O snapshot versionado [avaliacao.json](avaliacao.json) conserva métricas, grupos, esquema de features e hashes dos 20 classificadores, sem redistribuir os vídeos.
+Após a avaliação, os pesos YOLO, os 20 modelos treinados e seus manifestos foram incluídos no Git. Vídeos, downloads e caches de postura permanecem locais, ignorados pelo Git. A identidade de implantação adicionada ao manifesto permite reutilizar esses modelos após preparar as mesmas mídias em outro diretório, sem novo treino; datas dos arquivos, dispositivo e lote não fazem parte dela. O snapshot versionado [avaliacao.json](avaliacao.json) conserva métricas, grupos, esquema de features e hashes dos 20 classificadores, sem redistribuir os vídeos.
 
 ## Limites e próximos pontos de qualidade
 

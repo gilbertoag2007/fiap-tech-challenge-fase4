@@ -52,6 +52,23 @@ def source_identity(root: Path, catalog: dict | None = None) -> str:
                         'sklearn':sklearn.__version__,'pose_settings':pose_settings(root),'pose_engine':pose_engine()})
 
 
+def deployment_identity(root: Path, catalog: dict | None = None) -> str:
+    """Check published models against dataset content, independent of local runtime."""
+    catalog = catalog or load_catalog(root)
+    annotation_hash = digest(root / 'downloads/Segmentation.csv')
+    if catalog.get('annotation_sha256') != annotation_hash:
+        raise ValueError('As anotações mudaram. Prepare novamente o dataset.')
+    media = []
+    for video in catalog['videos']:
+        path = video_path(root,video)
+        media.append([video['id'],video['sha256'],path.stat().st_size])
+    engine = pose_engine()
+    pose_method = {key:engine[key] for key in ('ultralytics','imgsz','conf','tracker','decoder')}
+    return fingerprint({'catalog':catalog,'media':media,'weights':digest(weights_path(root)),
+                        'pipeline':PIPELINE_VERSION,'features':FEATURE_VERSION,'rf':RF_PARAMS,
+                        'sklearn':sklearn.__version__,'pose_method':pose_method})
+
+
 def repetition_rows(video: dict, pose: dict) -> list[dict]:
     rows = []
     for rep in video['repetitions']:
@@ -69,7 +86,7 @@ def repetition_rows(video: dict, pose: dict) -> list[dict]:
     return rows
 
 
-def train_records(root: Path, rows: list[dict], source: str) -> dict:
+def train_records(root: Path, rows: list[dict], source: str, deployment: str | None = None) -> dict:
     start = time.monotonic()
     identity = fingerprint({'source':source,'feature_version':FEATURE_VERSION,'rf':RF_PARAMS,'sklearn':sklearn.__version__})
     directory = root / 'experiments' / identity
@@ -79,6 +96,8 @@ def train_records(root: Path, rows: list[dict], source: str) -> dict:
                 'frame_convention':'source-one-based-inclusive/internal-zero-based','segmentation':'official_intervals',
                 'limitations':['Classificação acadêmica binária; não identifica tipo ou gravidade do erro.',
                                'Intervalos de repetição fornecidos pelo dataset; não detectados automaticamente.']}
+    if deployment is not None:
+        manifest['deployment_identity'] = deployment
     predictions = []
     for exercise in EXERCISES:
         all_rows = [r for r in rows if r['exercise_id']==exercise]
@@ -154,7 +173,7 @@ def train(root: Path) -> dict:
         for row in repetition_rows(video,extract_pose(root,video)):
             row.pop('series',None)
             rows.append(row)
-    return train_records(root,rows,source)
+    return train_records(root,rows,source,deployment_identity(root,catalog))
 
 
 def current_experiment(root: Path) -> dict:
@@ -162,7 +181,10 @@ def current_experiment(root: Path) -> dict:
     if not path.exists():
         raise ValueError('Classificadores ausentes. Execute: python -m fisioterapia train')
     manifest = read_json(path)
-    if manifest['source_identity'] != source_identity(root):
+    if 'deployment_identity' in manifest:
+        if manifest['deployment_identity'] != deployment_identity(root):
+            raise ValueError('Experimento desatualizado. Confira os dados, pesos e dependências publicados.')
+    elif manifest['source_identity'] != source_identity(root):
         raise ValueError('Experimento desatualizado. Execute novamente a extração e o treinamento.')
     return manifest
 

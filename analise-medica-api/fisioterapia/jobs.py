@@ -11,6 +11,7 @@ from .dataset import load_catalog, video_path
 
 def analysis_identity(root: Path, video: dict) -> str:
     from .training import current_experiment
+    from .pose import pose_identity, pose_settings, weights_path
     experiment = current_experiment(root)
     if digest(video_path(root,video)) != video['sha256']:
         raise ValueError('Vídeo alterado. Prepare o dataset e treine novamente.')
@@ -21,7 +22,8 @@ def analysis_identity(root: Path, video: dict) -> str:
     artifact = (root/fold['path']).resolve()
     if not artifact.is_relative_to((root/'experiments').resolve()) or digest(artifact) != fold['sha256']:
         raise ValueError('Artefato do modelo inválido. Treine novamente.')
-    return fingerprint({'video':video,'experiment':experiment['identity'],'model':fold['sha256']})
+    pose = pose_identity(video['sha256'],digest(weights_path(root)),**pose_settings(root))
+    return fingerprint({'video':video,'experiment':experiment['identity'],'model':fold['sha256'],'pose':pose})
 
 
 def run_analysis(root: Path, video: dict, progress) -> dict:
