@@ -24,6 +24,11 @@ htmlcov/
 data/*
 !data/.gitkeep
 !data/pacientes.json
+!data/fisioterapia/
+data/fisioterapia/*
+!data/fisioterapia/models/
+!data/fisioterapia/experiments/
+!data/fisioterapia/experiment.json
 
 # IDE and operating system files
 .vscode/

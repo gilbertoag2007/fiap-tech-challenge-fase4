@@ -119,17 +119,19 @@ O cenário confere reprodução, navegação por repetição, predição com par
 
 ## Artefatos e reprodução
 
-Os arquivos em `analise-medica-api/data/fisioterapia/` são ignorados pelo Git:
+Os pesos YOLO, os 20 classificadores treinados e seus manifestos foram incluídos no Git, nos caminhos originais de `analise-medica-api/data/fisioterapia/`. Os demais dados continuam gerados localmente:
 
 - `downloads/`: fontes, metadados e checksums do Zenodo;
 - `videos/` e `catalog.json`: mídia preparada e associação das gravações;
-- `models/yolov8n-pose.pt`: pesos oficiais de pose;
+- `models/yolov8n-pose.pt`: pesos oficiais de pose, versionados;
 - `poses/`: postura por vídeo e metadados de cache;
-- `experiments/`: classificadores por exercício/grupo, métricas e predições OOF;
-- `experiment.json`: manifesto do experimento ativo;
+- `experiments/`: classificadores por exercício/grupo, métricas e predições OOF, versionados;
+- `experiment.json`: manifesto do experimento ativo, versionado;
 - `jobs/` e `reports/`: tarefas e resultados da interface.
 
-Os modelos joblib são artefatos locais confiáveis, não entradas enviadas por usuários. Os hashes são conferidos antes de carregá-los. Alterações dos dados, pesos, versões e configurações exigem novo preparo/treino; não reutilize manualmente classificadores de outro experimento. A identidade compartilhada da engine inclui Ultralytics, PyTorch, OpenCV e política de rastreamento. Remover ou alterar um cache de postura invalida o resultado reutilizado. Após perda de associação por mais de 15 frames, o rastreador não assume que uma pessoa reaparecida é o mesmo participante; os frames restantes ficam sem postura associada.
+Esta inclusão publica os artefatos já produzidos, sem alterar o fluxo de preparação ou a validação de compatibilidade. Clonar o repositório não baixa os vídeos nem instala dependências. O manifesto ainda valida versões, configuração de extração e metadados locais da mídia; uma cópia em outra máquina pode exigir regenerar o experimento. A instalação portátil sem retreinamento não foi implementada nesta alteração.
+
+Os modelos joblib são artefatos produzidos por este projeto, não entradas enviadas por usuários. Os hashes são conferidos antes de carregá-los. Alterações dos dados, pesos, versões e configurações exigem novo preparo/treino; não reutilize manualmente classificadores de outro experimento. A identidade compartilhada da engine inclui Ultralytics, PyTorch, OpenCV e política de rastreamento. Remover ou alterar um cache de postura invalida o resultado reutilizado. Após perda de associação por mais de 15 frames, o rastreador não assume que uma pessoa reaparecida é o mesmo participante; os frames restantes ficam sem postura associada.
 
 ## Fonte e licença
 

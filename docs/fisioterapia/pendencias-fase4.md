@@ -15,7 +15,7 @@ Fonte: enunciado `IADT - Fase 4 - Tech challenge.pdf`, páginas 3–4, fornecido
 | Anomalias de movimentação durante internação | Pendente; exercícios de fisioterapia não comprovam por si só esse contexto |
 | Alertas automáticos para a equipe médica | Pendente |
 | Fusão multimodal e monitoramento em tempo real | Pendente |
-| Código completo em Git | Código, testes e documentação na branch feature/modal-video; revisão independente concluída; vídeos, modelos e caches não são versionados |
+| Código completo em Git | Código, testes e documentação na branch feature/modal-video; revisão independente concluída; pesos YOLO e modelos treinados incluídos; vídeos e caches não são versionados |
 | Relatório técnico multimodal com modelos, resultados e exemplos | Pendente como entrega completa; guia, métricas, matrizes e limitações deste módulo estão documentados |
 | Vídeo final até 15 min no YouTube/Vimeo | Ainda não confirmado/produzido nesta etapa |
 

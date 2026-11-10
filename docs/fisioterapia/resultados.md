@@ -76,7 +76,7 @@ A última retomada da extração levou **2.432,4 s (40 min 32 s)**, reaproveitan
 
 Experimento: `873b859dc49577cef59b94af1255d9a2622abbff1295a8b0c010368651b44aa7`.
 
-Dados, pesos, modelos e caches completos permanecem locais, ignorados pelo Git. O snapshot versionado [avaliacao.json](avaliacao.json) conserva métricas, grupos, esquema de features e hashes dos 20 classificadores, sem redistribuir os vídeos.
+Após a avaliação, os pesos YOLO, os 20 modelos treinados e seus manifestos foram incluídos no Git. Vídeos, downloads e caches de postura permanecem locais, ignorados pelo Git. A publicação dos artefatos não altera a validação de compatibilidade do experimento em outra máquina. O snapshot versionado [avaliacao.json](avaliacao.json) conserva métricas, grupos, esquema de features e hashes dos 20 classificadores, sem redistribuir os vídeos.
 
 ## Limites e próximos pontos de qualidade
 
