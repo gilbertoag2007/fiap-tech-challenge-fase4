@@ -56,7 +56,7 @@ python -m pip install -r requirements-video.lock.txt
 python -m uvicorn main:app --host 127.0.0.1 --port 8000 --workers 1
 ```
 
-Em Windows, use um Python 3.12 instalado e o ativador `.venv\Scripts\Activate.ps1`. O lock registra o ambiente usado na avaliação; compatibilidade de versões nativas deve ser conferida no host de destino. Para executar apenas a API de sinais, `requirements.txt` contém as dependências originais. A API pode iniciar sem as bibliotecas opcionais de visão, mas a análise de vídeo precisa delas.
+No Windows, siga a [sequência completa em PowerShell](#windows-powershell) para instalar, preparar os vídeos e iniciar a API. O lock registra o ambiente usado na avaliação; para Windows, o guia usa `requirements-video.txt`, com versões fixadas das dependências principais do módulo. Para executar apenas a API de sinais, `requirements.txt` contém as dependências originais. A API pode iniciar sem as bibliotecas opcionais de visão, mas a análise de vídeo precisa delas.
 
 O Swagger fica em `http://127.0.0.1:8000/docs` e o esquema em `/openapi.json`.
 
@@ -94,6 +94,28 @@ python -m fisioterapia evaluate
 ```
 
 `prepare` baixa e verifica o ZIP do [REHAB24-6](https://zenodo.org/records/13305826), extrai Ex1–Ex4 e cria o catálogo. `evaluate` confere a compatibilidade dos dados, pesos e dependências com os modelos publicados. Em seguida, inicie API e frontend e selecione uma gravação: o YOLO gera a postura daquele vídeo na primeira análise e a classificação usa o modelo já versionado. A inferência pode demorar na CPU; análises posteriores reutilizam o cache. `extract` para todos os vídeos e `train` são opcionais para reproduzir o experimento, não passos de instalação. Consulte o [guia de vídeo](docs/fisioterapia/README.md) para parâmetros e integridade.
+
+### Windows PowerShell
+
+Na raiz do repositório, com Python 3.12 instalado, execute os comandos abaixo em um terminal. A preparação baixa o pacote de vídeos (~2,5 GB) e extrai os exercícios selecionados (~1,7 GB); aguarde a conclusão antes de abrir a página.
+
+```powershell
+cd .\analise-medica-api
+py -3.12 -m venv .venv
+.\.venv\Scripts\Activate.ps1
+python -m pip install -r requirements-video.txt
+python -m fisioterapia prepare
+python -m fisioterapia evaluate
+python -m uvicorn main:app --host 127.0.0.1 --port 8000 --workers 1
+```
+
+Em um segundo terminal, na raiz do repositório, inicie o frontend com `py -3.12 -m http.server 5500 --bind 127.0.0.1 --directory analise-medica-frontend`. Quando `prepare` terminar, a página deve listar os exercícios; não é necessário executar `train`. Se aparecer **“Dataset não preparado”**, verifique no terminal da API o diretório usado e se o catálogo existe:
+
+```powershell
+python -c "from fisioterapia.config import root_path; print(root_path()); print((root_path() / 'catalog.json').is_file())"
+```
+
+O resultado esperado é o caminho `analise-medica-api\data\fisioterapia` seguido de `True`. Se aparecer `False` depois de `prepare` concluir, confira se o comando e a API usam o mesmo `FISIOTERAPIA_DATA_DIR`; ao mudar essa variável, reinicie a API.
 
 O sistema aceita apenas as gravações catalogadas, das câmeras 17 e 18, e usa a segmentação oficial das repetições. Não há upload de vídeos novos ou descoberta automática do exercício. O YOLOv8 Pose extrai pontos corporais; o Random Forest treinado pelo projeto usa as medidas derivadas para prever correção.
 

@@ -13,7 +13,7 @@ source .venv/bin/activate
 python -m pip install -r requirements-video.lock.txt
 ```
 
-O lock registra o ambiente completo usado na verificação, incluindo testes. Para instalar somente o conjunto declarado de dependências do módulo, use `requirements-video.txt`; `requirements-dev.txt` inclui pytest/httpx. No Windows, ative com `.venv\Scripts\Activate.ps1`. O módulo de sinais vitais continua podendo iniciar com suas dependências originais em `requirements.txt`; o processamento de vídeo exige as dependências adicionais.
+O lock registra o ambiente completo usado na verificação, incluindo testes. No Windows PowerShell, siga o [passo a passo do README raiz](../../README.md#windows-powershell), que usa `requirements-video.txt` e mostra como conferir o catálogo; `requirements-dev.txt` inclui pytest/httpx. O módulo de sinais vitais continua podendo iniciar com suas dependências originais em `requirements.txt`; o processamento de vídeo exige as dependências adicionais.
 
 ## Preparação para usar os modelos publicados
 
