@@ -9,7 +9,7 @@ Leia o [relatório técnico completo](docs/relatorio-tecnico-fase4.md) ([PDF](do
 | Área | Implementação | Estado da validação |
 |---|---|---|
 | Sinais vitais | Importação WFDB de um registro do catálogo, interpolação sinalizada, estatísticas de seis canais, análise informativa via OpenAI, CSV e JSON | Rotas e inicialização cobertas por testes de regressão; integração real PhysioNet/OpenAI e acerto clínico não foram avaliados neste repositório |
-| Fisioterapia | Ex1–Ex4 do REHAB24-6, duas câmeras, YOLOv8n Pose pré-treinado, medidas 2D, Random Forest por exercício, relatório por repetição e visualização | 94 vídeos/260.750 frames processados; avaliação por participante excluído do treino; 56 testes Python e 4 de navegador passaram nas execuções registradas |
+| Fisioterapia | Ex1–Ex4 do REHAB24-6, duas câmeras, YOLOv8n Pose pré-treinado, medidas 2D, Random Forest por exercício, relatório por repetição e visualização | 94 vídeos/260.750 frames processados; avaliação por participante excluído do treino; 58 testes Python e 4 de navegador passaram nas execuções registradas |
 
 No vídeo, a classificação é `Correto`, `Incorreto` ou `Não conclusivo`. A balanced accuracy medida foi 64,14% / 64,59% / **45,45%** / 73,40% para Ex1–Ex4, com cobertura 75,84% / 79,09% / 88,32% / 100%. O Ex3 tem qualidade insuficiente. O resultado é acadêmico, sem validação clínica.
 
@@ -117,6 +117,8 @@ python -c "from fisioterapia.config import root_path; print(root_path()); print(
 
 O resultado esperado é o caminho `analise-medica-api\data\fisioterapia` seguido de `True`. Se aparecer `False` depois de `prepare` concluir, confira se o comando e a API usam o mesmo `FISIOTERAPIA_DATA_DIR`; ao mudar essa variável, reinicie a API.
 
+Se `prepare` informar **“checksum inválido”** em um arquivo `.part`, atualize esta branch e execute o comando novamente. A preparação descarta arquivos temporários inválidos e lê corretamente respostas HTTP comprimidas; a conferência de checksum continua obrigatória.
+
 O sistema aceita apenas as gravações catalogadas, das câmeras 17 e 18, e usa a segmentação oficial das repetições. Não há upload de vídeos novos ou descoberta automática do exercício. O YOLOv8 Pose extrai pontos corporais; o Random Forest treinado pelo projeto usa as medidas derivadas para prever correção.
 
 ## API principal
@@ -153,7 +155,7 @@ npx playwright install chromium
 npm run test:e2e
 ```
 
-O último comando executa cenários controlados. Para incluir o cenário real dos quatro exercícios, prepare os dados/modelos, inicie a API local e execute `FIAP_REAL_API=1 npm run test:e2e` (POSIX). A verificação atual foi **56 testes Python aprovados**; a execução registrada de navegador teve quatro testes aprovados. Houve dois avisos upstream WFDB/pandas. Esses testes não medem acerto clínico da análise OpenAI nem validam os requisitos multimodais pendentes. Veja [resultados e matrizes](docs/fisioterapia/resultados.md).
+O último comando executa cenários controlados. Para incluir o cenário real dos quatro exercícios, prepare os dados/modelos, inicie a API local e execute `FIAP_REAL_API=1 npm run test:e2e` (POSIX). A verificação atual foi **58 testes Python aprovados**; a execução registrada de navegador teve quatro testes aprovados. Houve dois avisos upstream WFDB/pandas. Esses testes não medem acerto clínico da análise OpenAI nem validam os requisitos multimodais pendentes. Veja [resultados e matrizes](docs/fisioterapia/resultados.md).
 
 ## Licença de dados e limites
 

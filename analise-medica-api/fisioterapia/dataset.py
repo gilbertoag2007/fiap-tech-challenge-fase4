@@ -1,6 +1,5 @@
 import csv
 import re
-import shutil
 import stat
 import zipfile
 from pathlib import Path
@@ -142,12 +141,24 @@ def prepare(root: Path) -> dict:
             verify_file(target, metadata['checksum'])
             continue
         partial = downloads / (name + '.part')
-        if not partial.exists() or partial.stat().st_size != metadata['size']:
+        ready = False
+        if partial.exists() and partial.stat().st_size == metadata['size']:
+            try:
+                verify_file(partial, metadata['checksum'])
+                ready = True
+            except ValueError:
+                partial.unlink()
+        if not ready:
             with requests.get(metadata['links']['self'], stream=True, timeout=(30, 120)) as source:
                 source.raise_for_status()
                 with partial.open('wb') as output:
-                    shutil.copyfileobj(source.raw, output, length=1024 * 1024)
-        verify_file(partial, metadata['checksum'])
+                    for block in source.iter_content(1024 * 1024):
+                        output.write(block)
+            try:
+                verify_file(partial, metadata['checksum'])
+            except ValueError:
+                partial.unlink()
+                raise
         partial.replace(target)
     marker = root / 'videos/.extracted.json'
     checksum = digest(downloads / 'videos.zip', 'md5')

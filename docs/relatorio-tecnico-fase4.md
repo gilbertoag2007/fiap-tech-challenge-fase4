@@ -1,6 +1,6 @@
 # Relatório técnico — Prontuário Digital
 
-**FIAP Pós-Tech · Tech Challenge Fase 4 · 10 de novembro de 2026**
+**FIAP Pós-Tech · Tech Challenge Fase 4 · atualizado em 11 de novembro de 2026**
 
 **Estado:** documentação integral do projeto existente; entrega multimodal do enunciado ainda incompleta.
 
@@ -134,7 +134,7 @@ No total, **1.208 observações classificadas e 198 não conclusivas**, cobertur
 
 A matriz de confusão é de casos classificáveis; na ordem incorreto/correto, Ex1 = `[[82,55],[42,91]]`, Ex2 = `[[125,52],[63,89]]`, Ex3 = `[[46,51],[52,40]]` e Ex4 = `[[118,62],[45,195]]`. Os rótulos provêm da segmentação oficial e não descrevem causa, gravidade ou correção terapêutica. Um exemplo concreto da interface, PM_010/câmera 17, marcou 11 de 16 repetições como não conclusivas; o sistema expõe essa limitação em vez de dar resposta binária sem postura suficiente.
 
-**Validação de engenharia registrada:** 56 testes Python passaram (com dois avisos de depreciação upstream WFDB/pandas); quatro testes de navegador passaram, três controlados e um real envolvendo os quatro exercícios, reprodução, seek, download e conferência de que a pessoa ficou fora do treino. Em uma cópia isolada com novas datas dos 94 vídeos, os 20 modelos publicados foram aceitos sem treino e uma gravação de 1.042 frames foi analisada na CPU, gerando dez classificações. Capturas de uma amostra por exercício foram inspecionadas visualmente com pose sobreposta. Testes sintéticos e de navegador não substituem validação estatística/assistencial do classificador.
+**Validação de engenharia registrada:** 58 testes Python passaram (com dois avisos de depreciação upstream WFDB/pandas); quatro testes de navegador passaram, três controlados e um real envolvendo os quatro exercícios, reprodução, seek, download e conferência de que a pessoa ficou fora do treino. Os testes de 11/11 cobrem download HTTP comprimido e retomada após `.part` inválido. Em uma cópia isolada com novas datas dos 94 vídeos, os 20 modelos publicados foram aceitos sem treino e uma gravação de 1.042 frames foi analisada na CPU, gerando dez classificações. Capturas de uma amostra por exercício foram inspecionadas visualmente com pose sobreposta. Testes sintéticos e de navegador não substituem validação estatística/assistencial do classificador.
 
 ### 4.5. Artefatos e reprodução
 
@@ -171,4 +171,4 @@ No diretório `analise-medica-api`, usar Python 3.12, ambiente virtual e `python
 - **Pose:** [documentação de pose da Ultralytics](https://docs.ultralytics.com/tasks/pose/) e pesos `yolov8n-pose.pt` versionados no projeto.
 - **Evidências locais versionadas:** `docs/fisioterapia/avaliacao.json`, `reproducao.json`, `resultados.md`, `matrizes-confusao.png`, `analise-medica-api/tests/` e `tests/browser/`.
 
-Este documento descreve o estado do código e das evidências disponíveis em 10/11/2026. Seus itens pendentes são requisitos de implementação e validação, não resultados já obtidos.
+Este documento descreve o estado do código e das evidências disponíveis em 11/11/2026. Seus itens pendentes são requisitos de implementação e validação, não resultados já obtidos.

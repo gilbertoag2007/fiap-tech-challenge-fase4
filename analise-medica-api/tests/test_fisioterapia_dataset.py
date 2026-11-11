@@ -1,4 +1,6 @@
 import hashlib
+import gzip
+import io
 import json
 import zipfile
 
@@ -6,6 +8,7 @@ import cv2
 import numpy as np
 import pytest
 
+import fisioterapia.dataset as dataset
 from fisioterapia.dataset import build_catalog, safe_extract, verify_file, video_path
 
 
@@ -45,6 +48,47 @@ def test_checksum_rejects_truncated_file(tmp_path):
     with pytest.raises(ValueError, match='checksum'):
         verify_file(path, 'md5:d41d8cd98f00b204e9800998ecf8427e')
     verify_file(path, 'md5:' + hashlib.md5(b'truncated').hexdigest())
+
+
+@pytest.mark.parametrize('gzip_encoded',[False,True])
+def test_prepare_redownloads_corrupt_partial_even_when_size_matches(tmp_path,monkeypatch,gzip_encoded):
+    files = {'Segmentation.csv':b'valid-csv', 'Segmentation.txt':b'valid-notes', 'videos.zip':b'valid-zip'}
+    record = {'files':[{'key':name,'size':len(content),
+                        'checksum':'md5:' + hashlib.md5(content).hexdigest(),
+                        'links':{'self':'https://example.test/'+name}}
+                       for name,content in files.items()]}
+    partial = tmp_path/'downloads/Segmentation.csv.part'
+    partial.parent.mkdir()
+    partial.write_bytes(b'X'*len(files['Segmentation.csv']))
+
+    class Response:
+        def __init__(self,content=None,compressed=False):
+            self.content = content
+            self.raw = io.BytesIO(gzip.compress(content) if compressed else content) if content is not None else None
+        def raise_for_status(self):
+            pass
+        def json(self):
+            return record
+        def iter_content(self,chunk_size):
+            yield self.content
+        def __enter__(self):
+            return self
+        def __exit__(self,*args):
+            pass
+
+    def get(url,**kwargs):
+        if url == dataset.RECORD_URL:
+            return Response()
+        name = url.rsplit('/',1)[-1]
+        return Response(files[name],compressed=gzip_encoded and name=='Segmentation.csv')
+
+    monkeypatch.setattr(dataset.requests,'get',get)
+    monkeypatch.setattr(dataset,'safe_extract',lambda archive,destination:None)
+    monkeypatch.setattr(dataset,'build_catalog',lambda root:{'videos':[]})
+    monkeypatch.setattr(dataset,'load_annotations',lambda path:{})
+    assert dataset.prepare(tmp_path) == {'videos':[]}
+    assert (tmp_path/'downloads/Segmentation.csv').read_bytes() == files['Segmentation.csv']
+    assert not partial.exists()
 
 
 def test_catalog_maps_camera_and_preserves_official_intervals(prepared):

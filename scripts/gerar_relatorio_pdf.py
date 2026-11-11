@@ -197,7 +197,7 @@ class Report(BaseDocTemplate):
         canvas.setFillColor(TEAL)
         canvas.drawString(LEFT, PAGE_H - 28, 'FIAP · TECH CHALLENGE FASE 4')
         canvas.setFillColor(INK)
-        canvas.drawString(LEFT, 28, 'Prontuário Digital · relatório técnico · 10/11/2026')
+        canvas.drawString(LEFT, 28, 'Prontuário Digital · relatório técnico · 11/11/2026')
         canvas.drawRightString(PAGE_W - RIGHT, 28, str(doc.page))
         canvas.restoreState()
 
