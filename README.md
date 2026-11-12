@@ -117,6 +117,8 @@ python -c "from fisioterapia.config import root_path; print(root_path()); print(
 
 O resultado esperado é o caminho `analise-medica-api\data\fisioterapia` seguido de `True`. Se aparecer `False` depois de `prepare` concluir, confira se o comando e a API usam o mesmo `FISIOTERAPIA_DATA_DIR`; ao mudar essa variável, reinicie a API.
 
+Abra `http://127.0.0.1:5500/pages/fisioterapia.html`. Se a página piscar e a API receber vários `GET /v1/fisioterapia/catalogo` após clicar em **Analisar vídeo**, pare o **Live Server** do VS Code e use o servidor Python acima. Durante a análise, a API atualiza arquivos de progresso dentro do repositório; o Live Server pode interpretar essas mudanças como motivo para recarregar a página. Pare o Live Server antes de iniciar o servidor Python, pois ambos podem tentar usar a porta 5500. A URL correta do servidor Python não inclui `/analise-medica-frontend/`.
+
 Se `prepare` informar **“checksum inválido”** em um arquivo `.part`, atualize esta branch e execute o comando novamente. A preparação descarta arquivos temporários inválidos e lê corretamente respostas HTTP comprimidas; a conferência de checksum continua obrigatória.
 
 O sistema aceita apenas as gravações catalogadas, das câmeras 17 e 18, e usa a segmentação oficial das repetições. Não há upload de vídeos novos ou descoberta automática do exercício. O YOLOv8 Pose extrai pontos corporais; o Random Forest treinado pelo projeto usa as medidas derivadas para prever correção.
