@@ -2,5 +2,5 @@
 import os
 from .config import root_path
 
-# Keep optional estimator settings with the generated local artifacts.
-os.environ.setdefault('YOLO_CONFIG_DIR',str(root_path()/'ultralytics-settings'))
+# Ultralytics adds its own subdirectory; use the existing data root as its parent.
+os.environ.setdefault('YOLO_CONFIG_DIR',str(root_path()))
