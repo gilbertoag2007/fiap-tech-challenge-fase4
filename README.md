@@ -52,11 +52,11 @@ A partir da raiz do repositório, em um terminal POSIX:
 cd analise-medica-api
 python3.12 -m venv .venv
 source .venv/bin/activate
-python -m pip install -r requirements-video.lock.txt
+python -m pip install -r requirements-video.txt
 python -m uvicorn main:app --host 127.0.0.1 --port 8000 --workers 1
 ```
 
-No Windows, siga a [sequência completa em PowerShell](#windows-powershell) para instalar, preparar os vídeos e iniciar a API. **Não instale `requirements-video.lock.txt` no Windows:** esse lock do ambiente POSIX inclui `uvloop`, que não oferece suporte a Windows. Use `requirements-video.txt`, com versões fixadas das dependências principais do módulo. Para executar apenas a API de sinais, `requirements.txt` contém as dependências originais. A API pode iniciar sem as bibliotecas opcionais de visão, mas a análise de vídeo precisa delas.
+No Windows, siga a [sequência completa em PowerShell](#windows-powershell) para instalar, preparar os vídeos e iniciar a API. `requirements-video.txt` fixa as versões das dependências principais do módulo, sem prender a instalação a um sistema operacional. Para executar apenas a API de sinais, `requirements.txt` contém as dependências originais. A API pode iniciar sem as bibliotecas opcionais de visão, mas a análise de vídeo precisa delas.
 
 O Swagger fica em `http://127.0.0.1:8000/docs` e o esquema em `/openapi.json`.
 
@@ -110,7 +110,7 @@ python -m fisioterapia evaluate
 python -m uvicorn main:app --host 127.0.0.1 --port 8000 --workers 1
 ```
 
-Se a instalação parou com `RuntimeError: uvloop does not support Windows`, o arquivo de dependências errado foi usado. Dentro de `analise-medica-api`, execute `python -m pip install -r requirements-video.txt` no mesmo ambiente virtual; não é necessário instalar `uvloop` nem recriar o ambiente. O comando `evaluate` apenas confere a compatibilidade dos dados preparados com o experimento publicado e mostra métricas já salvas: é opcional para usar a aplicação.
+Se uma instalação anterior parou com `RuntimeError: uvloop does not support Windows`, dentro de `analise-medica-api` execute `python -m pip install -r requirements-video.txt` no mesmo ambiente virtual; não é necessário instalar `uvloop` nem recriar o ambiente. O comando `evaluate` apenas confere a compatibilidade dos dados preparados com o experimento publicado e mostra métricas já salvas: é opcional para usar a aplicação.
 
 Em um segundo terminal, na raiz do repositório, inicie o frontend com `py -3.12 -m http.server 5500 --bind 127.0.0.1 --directory analise-medica-frontend`. Quando `prepare` terminar, a página deve listar os exercícios; não é necessário executar `train`. Se aparecer **“Dataset não preparado”**, verifique no terminal da API o diretório usado e se o catálogo existe:
 

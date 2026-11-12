@@ -10,10 +10,10 @@ Use Python 3.12 e execute a partir da raiz do repositório:
 cd analise-medica-api
 python3.12 -m venv .venv
 source .venv/bin/activate
-python -m pip install -r requirements-video.lock.txt
+python -m pip install -r requirements-video.txt
 ```
 
-O lock registra o ambiente completo usado na verificação, incluindo testes. No Windows PowerShell, siga o [passo a passo do README raiz](../../README.md#windows-powershell), que usa `requirements-video.txt` e mostra como conferir o catálogo; `requirements-dev.txt` inclui pytest/httpx. O módulo de sinais vitais continua podendo iniciar com suas dependências originais em `requirements.txt`; o processamento de vídeo exige as dependências adicionais.
+O arquivo `requirements-video.txt` fixa as versões das bibliotecas principais usadas no vídeo e funciona também no Windows. Para os comandos PowerShell, siga o [passo a passo do README raiz](../../README.md#windows-powershell); `requirements-dev.txt` inclui pytest/httpx para testes. O módulo de sinais vitais continua podendo iniciar com suas dependências originais em `requirements.txt`; o processamento de vídeo exige as dependências adicionais.
 
 ## Preparação para usar os modelos publicados
 
@@ -21,10 +21,11 @@ Os comandos seguintes são executados dentro de `analise-medica-api`, com o ambi
 
 ```sh
 python -m fisioterapia prepare
+# Opcional: confere o experimento publicado e mostra métricas já salvas.
 python -m fisioterapia evaluate
 ```
 
-O comando `prepare` baixa o pacote de vídeos completo (aproximadamente 2,7 GB) e as anotações, verifica os checksums publicados e extrai Ex1–Ex4. `evaluate` confere a identidade portátil do experimento e exibe as métricas dos classificadores já incluídos no Git. **Não é necessário executar `train` para analisar os vídeos.** É necessário espaço adicional para os vídeos extraídos, o ambiente Python e os caches. Uma interrupção do download deixa um arquivo `.part`, que não é tratado como válido sem a verificação de checksum.
+O comando `prepare` baixa o pacote de vídeos completo (aproximadamente 2,7 GB) e as anotações, verifica os checksums publicados e extrai Ex1–Ex4. `evaluate` é opcional para usar a aplicação: confere a identidade portátil do experimento e exibe as métricas dos classificadores já incluídos no Git. **Não é necessário executar `train` para analisar os vídeos.** É necessário espaço adicional para os vídeos extraídos, o ambiente Python e os caches. Uma interrupção do download deixa um arquivo `.part`, que não é tratado como válido sem a verificação de checksum.
 
 O processamento usa CPU por padrão. Em um Mac compatível, a extração pode ser acelerada com:
 

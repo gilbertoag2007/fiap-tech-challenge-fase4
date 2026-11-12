@@ -70,7 +70,7 @@ Comandos reproduzíveis estão no [guia de execução](README.md). A avaliação
 
 ## Ambiente, duração e rastreabilidade
 
-Python 3.12 em macOS arm64, aceleração MPS com lote 8. Versões e hash dos pesos estão em [reproducao.json](reproducao.json); o lock de dependências está na API. O caminho CPU permanece disponível, mas não foi medida uma extração integral em CPU nesta etapa.
+Python 3.12 em macOS arm64, aceleração MPS com lote 8. Versões e hash dos pesos estão em [reproducao.json](reproducao.json); as dependências principais estão em [requirements-video.txt](../../analise-medica-api/requirements-video.txt). Esse arquivo não fixa todas as dependências transitivas do ambiente original. O caminho CPU permanece disponível, mas não foi medida uma extração integral em CPU nesta etapa.
 
 A última retomada da extração levou **2.432,4 s (40 min 32 s)**, reaproveitando os caches já concluídos. Esse número **não representa o custo total de processamento a partir de zero**. O processamento anterior incluiu perfilamento, interrupções controladas e invalidação dos caches após mudanças de rastreamento/decoder; o tempo integral limpo não foi medido. O comando de treino levou **13,2 s**, incluindo leitura dos caches e medidas; o ajuste dos modelos registrado no manifesto levou **3,563 s**.
 
