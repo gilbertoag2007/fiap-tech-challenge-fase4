@@ -42,6 +42,20 @@ def test_zip_cannot_write_outside_destination(tmp_path):
     assert not (tmp_path / 'escape.txt').exists()
 
 
+def test_safe_extract_reports_progress(tmp_path):
+    archive = tmp_path / 'videos.zip'
+    with zipfile.ZipFile(archive, 'w') as source:
+        source.writestr('Ex1/Camera17/PM_001.mp4', b'first')
+        source.writestr('Ex1/Camera18/PM_001.mp4', b'second')
+    messages = []
+
+    safe_extract(archive, tmp_path / 'videos', progress=messages.append)
+
+    assert (tmp_path / 'videos/Ex1/Camera17/PM_001.mp4').read_bytes() == b'first'
+    assert (tmp_path / 'videos/Ex1/Camera18/PM_001.mp4').read_bytes() == b'second'
+    assert any('2/2' in message for message in messages)
+
+
 def test_checksum_rejects_truncated_file(tmp_path):
     path = tmp_path / 'data'
     path.write_bytes(b'truncated')
@@ -83,12 +97,17 @@ def test_prepare_redownloads_corrupt_partial_even_when_size_matches(tmp_path,mon
         return Response(files[name],compressed=gzip_encoded and name=='Segmentation.csv')
 
     monkeypatch.setattr(dataset.requests,'get',get)
-    monkeypatch.setattr(dataset,'safe_extract',lambda archive,destination:None)
-    monkeypatch.setattr(dataset,'build_catalog',lambda root:{'videos':[]})
+    monkeypatch.setattr(dataset,'safe_extract',lambda archive,destination,progress=None:None)
+    monkeypatch.setattr(dataset,'build_catalog',lambda root,progress=None:{'videos':[]})
     monkeypatch.setattr(dataset,'load_annotations',lambda path:{})
-    assert dataset.prepare(tmp_path) == {'videos':[]}
+    messages = []
+    assert dataset.prepare(tmp_path, progress=messages.append) == {'videos':[]}
     assert (tmp_path/'downloads/Segmentation.csv').read_bytes() == files['Segmentation.csv']
     assert not partial.exists()
+    assert any('Zenodo' in message for message in messages)
+    assert any('Segmentation.csv' in message and '100%' in message for message in messages)
+    assert any('Extra' in message for message in messages)
+    assert any('catálogo' in message.lower() for message in messages)
 
 
 def test_catalog_maps_camera_and_preserves_official_intervals(prepared):
@@ -104,6 +123,15 @@ def test_catalog_maps_camera_and_preserves_official_intervals(prepared):
     assert video['repetitions'][0]['last_frame'] == 9
     assert video_path(prepared, video).is_file()
     assert len(video['id']) == 20
+
+
+def test_build_catalog_reports_progress(prepared):
+    messages = []
+
+    catalog = build_catalog(prepared, progress=messages.append)
+
+    assert len(catalog['videos']) == 1
+    assert any('1/1' in message for message in messages)
 
 
 def test_catalog_rejects_annotation_outside_video(prepared):

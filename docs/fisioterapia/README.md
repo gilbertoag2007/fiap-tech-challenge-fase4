@@ -27,6 +27,8 @@ python -m fisioterapia evaluate
 
 O comando `prepare` baixa o pacote de vídeos completo (aproximadamente 2,7 GB) e as anotações, verifica os checksums publicados e extrai Ex1–Ex4. `evaluate` é opcional para usar a aplicação: confere a identidade portátil do experimento e exibe as métricas dos classificadores já incluídos no Git. **Não é necessário executar `train` para analisar os vídeos.** É necessário espaço adicional para os vídeos extraídos, o ambiente Python e os caches. Uma interrupção do download deixa um arquivo `.part`, que não é tratado como válido sem a verificação de checksum.
 
+Durante `prepare`, o terminal mostra a etapa atual e o avanço dos downloads, da extração e da conferência dos vídeos. Os arquivos ficam em `analise-medica-api/data/fisioterapia/`: originais em `downloads/`, MP4 extraídos em `videos/` e índice em `catalog.json`. Uma preparação concluída pode ser reutilizada nas próximas inicializações.
+
 O processamento usa CPU por padrão. Em um Mac compatível, a extração pode ser acelerada com:
 
 ```sh

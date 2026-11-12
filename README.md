@@ -90,10 +90,13 @@ Os pesos oficiais YOLOv8 Pose e 20 classificadores experimentais já estão vers
 
 ```sh
 python -m fisioterapia prepare
+# Opcional: confere o experimento publicado e mostra métricas já salvas.
 python -m fisioterapia evaluate
 ```
 
-`prepare` baixa e verifica o ZIP do [REHAB24-6](https://zenodo.org/records/13305826), extrai Ex1–Ex4 e cria o catálogo. `evaluate` confere a compatibilidade dos dados, pesos e dependências com os modelos publicados. Em seguida, inicie API e frontend e selecione uma gravação: o YOLO gera a postura daquele vídeo na primeira análise e a classificação usa o modelo já versionado. A inferência pode demorar na CPU; análises posteriores reutilizam o cache. `extract` para todos os vídeos e `train` são opcionais para reproduzir o experimento, não passos de instalação. Consulte o [guia de vídeo](docs/fisioterapia/README.md) para parâmetros e integridade.
+`prepare` baixa e verifica o ZIP do [REHAB24-6](https://zenodo.org/records/13305826), extrai Ex1–Ex4 e cria o catálogo. Ele mostra no terminal a etapa atual e o progresso dos downloads, da extração e da conferência dos vídeos. Os arquivos ficam em `analise-medica-api/data/fisioterapia/`: fontes em `downloads/`, MP4 em `videos/` e catálogo em `catalog.json`. Depois de uma preparação concluída, não é necessário executá-lo novamente para iniciar a API. Também é possível copiar a pasta `data/fisioterapia/` já preparada de outro computador para o mesmo caminho em um clone; isso dispensa repetir `prepare`, mas não a instalação das dependências nem a inicialização da API e do frontend.
+
+`evaluate` confere a compatibilidade dos dados, pesos e dependências com os modelos publicados. Em seguida, inicie API e frontend e selecione uma gravação: o YOLO gera a postura daquele vídeo na primeira análise e a classificação usa o modelo já versionado. A inferência pode demorar na CPU; análises posteriores reutilizam o cache. `extract` para todos os vídeos e `train` são opcionais para reproduzir o experimento, não passos de instalação. Consulte o [guia de vídeo](docs/fisioterapia/README.md) para parâmetros e integridade.
 
 ### Windows PowerShell
 
@@ -115,10 +118,10 @@ Se uma instalação anterior parou com `RuntimeError: uvloop does not support Wi
 Em um segundo terminal, na raiz do repositório, inicie o frontend com `py -3.12 -m http.server 5500 --bind 127.0.0.1 --directory analise-medica-frontend`. Quando `prepare` terminar, a página deve listar os exercícios; não é necessário executar `train`. Se aparecer **“Dataset não preparado”**, verifique no terminal da API o diretório usado e se o catálogo existe:
 
 ```powershell
-python -c "from fisioterapia.config import root_path; print(root_path()); print((root_path() / 'catalog.json').is_file())"
+python -c "from fisioterapia.config import root_path; p=root_path(); print(p); print('catalogo:', (p / 'catalog.json').is_file()); print('videos:', len(list((p / 'videos').rglob('*.mp4'))))"
 ```
 
-O resultado esperado é o caminho `analise-medica-api\data\fisioterapia` seguido de `True`. Se aparecer `False` depois de `prepare` concluir, confira se o comando e a API usam o mesmo `FISIOTERAPIA_DATA_DIR`; ao mudar essa variável, reinicie a API.
+O resultado esperado é o caminho `analise-medica-api\data\fisioterapia`, `catalogo: True` e `videos: 94`. Se o catálogo não existir depois de `prepare` concluir, confira se o comando e a API usam o mesmo `FISIOTERAPIA_DATA_DIR`; ao mudar essa variável, reinicie a API.
 
 Abra `http://127.0.0.1:5500/pages/fisioterapia.html`. Se a página piscar e a API receber vários `GET /v1/fisioterapia/catalogo` após clicar em **Analisar vídeo**, pare o **Live Server** do VS Code e use o servidor Python acima. Durante a análise, a API atualiza arquivos de progresso dentro do repositório; o Live Server pode interpretar essas mudanças como motivo para recarregar a página. Pare o Live Server antes de iniciar o servidor Python, pois ambos podem tentar usar a porta 5500. A URL correta do servidor Python não inclui `/analise-medica-frontend/`.
 

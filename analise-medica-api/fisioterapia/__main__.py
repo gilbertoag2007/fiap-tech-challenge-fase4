@@ -26,7 +26,7 @@ def main():
         write_json(root/'runtime.json',{'device':args.device,'batch':args.batch})
     started = time.monotonic()
     if args.command == 'prepare':
-        catalog = prepare(root)
+        catalog = prepare(root, progress=lambda message: print(message, flush=True))
         print(json.dumps({'videos':len(catalog['videos']),'exercises':catalog['exercises']},ensure_ascii=False))
     elif args.command == 'weights':
         target = root/'models/yolov8n-pose.pt'

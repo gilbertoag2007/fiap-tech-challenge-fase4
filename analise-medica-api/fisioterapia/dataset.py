@@ -1,14 +1,17 @@
 import csv
 import re
 import stat
+import time
 import zipfile
 from pathlib import Path
+from typing import Callable
 
 import requests
 
 from .config import EXERCISES, digest, fingerprint, read_json, write_json
 
 RECORD_URL = 'https://zenodo.org/api/records/13305826'
+Progress = Callable[[str], None]
 
 
 def verify_file(path: Path, checksum: str) -> None:
@@ -17,20 +20,28 @@ def verify_file(path: Path, checksum: str) -> None:
         raise ValueError(f'Arquivo com checksum inválido: {path.name}')
 
 
-def safe_extract(archive: Path, destination: Path) -> None:
+def safe_extract(archive: Path, destination: Path, progress: Progress | None = None) -> None:
     destination.mkdir(parents=True, exist_ok=True)
     base = destination.resolve()
     with zipfile.ZipFile(archive) as source:
+        selected = []
         for item in source.infolist():
             target = (base / item.filename).resolve()
             if not target.is_relative_to(base) or stat.S_ISLNK(item.external_attr >> 16):
                 raise ValueError('ZIP contém caminho não permitido.')
-        for item in source.infolist():
             # Do not retain exercises outside this module, when encoded in the path.
             exercise = re.search(r'(?:^|/)Ex(?:ercise)?[_ -]?([1-6])(?:/|[_ -])', item.filename, re.I)
             if exercise and int(exercise[1]) not in EXERCISES:
                 continue
+            selected.append(item)
+        total = len(selected)
+        if progress:
+            progress(f'Extração: 0/{total} arquivos.')
+        step = max(1, total // 20)
+        for index, item in enumerate(selected, 1):
             source.extract(item, base)
+            if progress and (index % step == 0 or index == total):
+                progress(f'Extração: {index}/{total} arquivos.')
 
 
 def video_path(root: Path, video: dict) -> Path:
@@ -69,12 +80,14 @@ def load_annotations(path: Path) -> dict:
     return by_video
 
 
-def build_catalog(root: Path) -> dict:
+def build_catalog(root: Path, progress: Progress | None = None) -> dict:
     import cv2
     annotations = load_annotations(root / 'downloads/Segmentation.csv')
     videos = []
     identities = set()
-    for path in sorted((root / 'videos').rglob('*.mp4')):
+    paths = sorted((root / 'videos').rglob('*.mp4'))
+    total = len(paths)
+    for index, path in enumerate(paths, 1):
         recording = re.search(r'PM_\d+', path.stem)
         if not recording or recording[0] not in annotations:
             continue
@@ -107,6 +120,8 @@ def build_catalog(root: Path) -> dict:
             'sha256': digest(path), 'fps': fps, 'frame_count': count,
             'width': width, 'height': height, 'repetitions': reps,
         })
+        if progress and (index % max(1, total // 20) == 0 or index == total):
+            progress(f'Catálogo: {index}/{total} vídeos verificados.')
     if not videos:
         raise ValueError('Nenhum vídeo Ex1–Ex4 encontrado. Execute a preparação do dataset.')
     result = {
@@ -127,9 +142,11 @@ def load_catalog(root: Path) -> dict:
     return read_json(path)
 
 
-def prepare(root: Path) -> dict:
+def prepare(root: Path, progress: Progress | None = None) -> dict:
     downloads = root / 'downloads'
     downloads.mkdir(parents=True, exist_ok=True)
+    if progress:
+        progress('Consultando metadados do Zenodo...')
     response = requests.get(RECORD_URL, timeout=60)
     response.raise_for_status()
     record = response.json()
@@ -138,36 +155,71 @@ def prepare(root: Path) -> dict:
         metadata = next(f for f in record['files'] if f['key'] == name)
         target = downloads / name
         if target.exists():
+            if progress:
+                progress(f'Verificando arquivo existente: {name}...')
             verify_file(target, metadata['checksum'])
+            if progress:
+                progress(f'{name}: checksum válido.')
             continue
         partial = downloads / (name + '.part')
         ready = False
         if partial.exists() and partial.stat().st_size == metadata['size']:
+            if progress:
+                progress(f'Verificando download parcial: {name}...')
             try:
                 verify_file(partial, metadata['checksum'])
                 ready = True
             except ValueError:
                 partial.unlink()
+                if progress:
+                    progress(f'{name}: parcial inválido descartado.')
         if not ready:
+            if progress:
+                progress(f'Baixando {name}...')
             with requests.get(metadata['links']['self'], stream=True, timeout=(30, 120)) as source:
                 source.raise_for_status()
+                received = 0
+                last_percent = -1
+                last_report = time.monotonic()
                 with partial.open('wb') as output:
                     for block in source.iter_content(1024 * 1024):
                         output.write(block)
+                        received += len(block)
+                        if progress:
+                            percent = min(100, int(received * 100 / metadata['size'])) if metadata['size'] else 100
+                            now = time.monotonic()
+                            if percent > last_percent or now - last_report >= 5:
+                                progress(f'{name}: {received / 1048576:.1f}/{metadata["size"] / 1048576:.1f} MiB ({percent}%).')
+                                last_percent = percent
+                                last_report = now
+            if progress:
+                progress(f'Verificando checksum de {name}...')
             try:
                 verify_file(partial, metadata['checksum'])
             except ValueError:
                 partial.unlink()
                 raise
         partial.replace(target)
+        if progress:
+            progress(f'{name}: checksum válido.')
     marker = root / 'videos/.extracted.json'
+    if progress:
+        progress('Verificando pacote de vídeos antes da extração...')
     checksum = digest(downloads / 'videos.zip', 'md5')
     if not marker.exists() or read_json(marker).get('md5') != checksum:
-        safe_extract(downloads / 'videos.zip', root / 'videos')
+        if progress:
+            progress('Extraindo vídeos selecionados...')
+        safe_extract(downloads / 'videos.zip', root / 'videos', progress=progress)
         write_json(marker, {'md5': checksum})
-    result = build_catalog(root)
+    elif progress:
+        progress('Extração já concluída; reutilizando vídeos.')
+    if progress:
+        progress('Construindo catálogo e conferindo vídeos...')
+    result = build_catalog(root, progress=progress)
     expected = {(recording,camera) for recording in load_annotations(downloads/'Segmentation.csv') for camera in (17,18)}
     actual = {(v['recording_id'],v['camera']) for v in result['videos']}
     if actual != expected:
         raise ValueError('Dataset incompleto: faltam gravações/câmeras das anotações selecionadas.')
+    if progress:
+        progress(f'Preparação concluída: {len(result["videos"])} vídeos no catálogo.')
     return result
