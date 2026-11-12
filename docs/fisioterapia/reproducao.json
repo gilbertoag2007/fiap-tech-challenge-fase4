@@ -1,0 +1,46 @@
+{
+  "date": "2026-11-10",
+  "experiment_identity": "873b859dc49577cef59b94af1255d9a2622abbff1295a8b0c010368651b44aa7",
+  "video_count": 94,
+  "frame_count": 260750,
+  "unique_repetitions": 703,
+  "camera_observations": 1406,
+  "annotation_sha256": "72c70bc7e56eafb132452a850f7a56d21c3cb4a602bab1e98370f9b606567100",
+  "videos_zip_md5": "ed183a245a1b171638e422f7a288e5a8",
+  "weights_sha256": "c6fa93dd1ee4a2c18c900a45c1d864a1c6f7aba75d84f91648a30b7fb641d212",
+  "pose_engine": {
+    "pipeline": "rehab24-yolov8-v1",
+    "ultralytics": "8.3.235",
+    "torch": "2.15.0",
+    "opencv": "4.12.0",
+    "imgsz": 640,
+    "conf": 0.25,
+    "tracker": "spatial-v2-gap15",
+    "av": "16.0.1",
+    "decoder": "pyav-bilinear640-v1"
+  },
+  "pose_settings": {
+    "device": "mps",
+    "batch": 8
+  },
+  "extraction_final_resume_seconds": 2432.4,
+  "extraction_timing_note": "Última retomada, com reaproveitamento dos caches já concluídos; não representa o tempo de extração integral a partir de zero.",
+  "train_cli_seconds": 13.2,
+  "model_fitting_seconds": 3.563,
+  "python_tests": {
+    "passed": 53,
+    "warnings": 2,
+    "seconds": 48.15
+  },
+  "browser_tests": {
+    "passed": 4,
+    "skipped": 0,
+    "seconds": 12.604,
+    "real_exercises": [
+      1,
+      2,
+      3,
+      4
+    ]
+  }
+}

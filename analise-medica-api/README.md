@@ -1,5 +1,9 @@
 # analise-medica-api
 
+## Módulo de fisioterapia (Fase 4)
+
+A API também oferece análise de quatro exercícios do REHAB24-6 em `/v1/fisioterapia`, com YOLOv8 Pose, classificação por repetição e avaliação separada por participante. Consulte [preparação, execução, testes e limitações](../docs/fisioterapia/README.md). O processamento de vídeo exige Python 3.12 e as dependências de `requirements-video.txt`; `requirements-dev.txt` inclui os testes. A instalação original de sinais vitais abaixo continua disponível.
+
 API FastAPI para consultar o catálogo de pacientes, recuperar relatórios de sinais vitais e importar registros do PhysioNet para análise descritiva com suporte de IA.
 
 ## Visão geral
@@ -54,7 +58,7 @@ uvicorn main:app --app-dir analise-medica-api --reload
 Os arquivos produzidos pela API ficam em `data/` e incluem:
 
 - `data/pacientes.json`: catálogo de pacientes disponíveis para consulta e importação.
-- `data/referencias_sinais_vitais.json`: tabelas de referência dos sinais.
+- `data/referencias_sinais_vitais.json`: arquivo esperado para tabelas de referência; não está versionado neste checkout.
 - `data/<NOME_DO_PACIENTE>/<YYYYMMDD_HHMMSS>/`: diretório com CSV e relatório JSON da execução.
 
 Os arquivos gerados são normalmente ignorados pelo Git, enquanto `data/pacientes.json` e o marcador da pasta são versionados.
@@ -77,7 +81,7 @@ Resposta: lista de pacientes com os campos:
     "id": "3000190n",
     "cpf": "12345678900",
     "nome": "Carlos Alberto Lima",
-    "idade": 52,
+    "idade": 55,
     "genero": "Masculino",
     "prontuario": "Histórico clínico do paciente"
   }

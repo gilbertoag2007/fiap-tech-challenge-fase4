@@ -108,7 +108,7 @@ Ao selecionar um paciente, o frontend:
 - carrega o relatório JSON completo em `/v1/sinais-vitais/relatorio`;
 - carrega o CSV detalhado do paciente em `/v1/sinais-vitais/datalhamento`;
 - analisa os dados em CSV e extrai os sinais vitais;
-- renderiza gráficos do tipo:
+- renderiza gráficos estáticos do CSV, sem atualização contínua, do tipo:
   - HR
   - SpO2
   - NBPs
@@ -144,7 +144,7 @@ Também trata:
 1. O usuário escolhe um paciente na tela.
 2. O frontend consulta `/v1/sinais-vitais/paciente` para montar a lista.
 3. O serviço de sinais vitais solicita o CSV do paciente com `id` como parâmetro.
-4. O frontend lê o CSV e cria os gráficos em tempo real.
+4. O frontend lê o CSV e cria os gráficos da última importação disponível.
 5. O relatório de análise é consultado para preencher resumos, status e descrições por sinal.
 6. A tabela de referência é consultada por sinal para mostrar faixas de normalidade.
 
@@ -168,3 +168,6 @@ A aplicação principal de sinal vitals fica em:
 ```text
 http://127.0.0.1:5500/pages/sinais-vitais.html
 ```
+# Fisioterapia — Fase 4
+
+A página `pages/fisioterapia.html` integra os quatro exercícios REHAB24-6 à API `/v1/fisioterapia`. A preparação dos vídeos e dos modelos é necessária antes da análise. Consulte [o guia do módulo](../docs/fisioterapia/README.md) para instalação, comandos e testes.

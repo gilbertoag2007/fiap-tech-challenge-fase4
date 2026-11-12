@@ -747,3 +747,39 @@ body {
     max-width: 13rem;
   }
 }
+:root {
+  --rehab-accent: #087e8b;
+}
+
+.rehab-card { box-shadow: 0 8px 32px rgba(20, 44, 58, .05); border-radius: 16px; min-width: 0; }
+.rehab-card .card-body { padding: 1.5rem; }
+.rehab-filters { display: grid; grid-template-columns: 1.5fr .7fr 1fr; gap: 1rem; }
+.rehab-filters > div { min-width: 0; }
+.rehab-filters select { text-overflow: ellipsis; }
+.rehab-workspace { display: grid; grid-template-columns: 1.3fr 1fr; gap: 1.5rem; align-items: start; }
+.rehab-player { position: relative; background: #142330; border-radius: 10px; overflow: hidden; }
+.rehab-player video { width: 100%; height: 420px; object-fit: contain; display: block; }
+#pose-overlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.rehab-progress { width: 100%; height: 10px; accent-color: var(--rehab-accent); }
+.rehab-chart { position: relative; height: 300px; margin: 1rem 0; }
+.rehab-chart canvas { max-width: 100%; }
+.rehab-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+.rehab-stat { background: #f3f8f9; padding: 1rem; border-radius: 10px; display: flex; flex-direction: column; }
+.rehab-stat strong { font-size: 1.8rem; color: #174c55; }
+.rehab-stat span { font-size: .85rem; color: #526677; }
+.rehab-table { font-size: .9rem; }
+.rehab-table td, .rehab-table th { white-space: nowrap; padding: .85rem .7rem; }
+.rehab-correct { color: #167454 !important; font-weight: 600; }
+.rehab-incorrect { color: #b73636 !important; font-weight: 600; }
+.rehab-inconclusive { color: #866010 !important; font-weight: 600; }
+.rehab-card[hidden], #analysis-progress[hidden], #analysis-error[hidden], #retry-catalog[hidden] { display: none !important; }
+@media (max-width: 991px) {
+  .rehab-workspace { grid-template-columns: 1fr; }
+}
+@media (max-width: 575px) {
+  .rehab-filters { grid-template-columns: 1fr; }
+  .rehab-card .card-body { padding: 1rem; }
+  .rehab-summary { grid-template-columns: repeat(2, 1fr); gap: .5rem; }
+  .rehab-player video { height: 320px; }
+  .rehab-chart { height: 240px; }
+}
