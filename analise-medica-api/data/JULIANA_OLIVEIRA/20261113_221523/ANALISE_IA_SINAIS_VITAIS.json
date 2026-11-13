@@ -1,0 +1,32 @@
+[
+  {
+    "sinal_vital": "HR",
+    "status": "Alterado",
+    "analise_ia": "Frequência cardíaca entre 137 e 158 bpm, com média de 149,98, muito elevada para uma adulta se as medições forem confiáveis. Pode representar risco importante e requer avaliação urgente; procure atendimento de emergência, especialmente se houver mal-estar, dor no peito, falta de ar ou desmaio."
+  },
+  {
+    "sinal_vital": "SpO2",
+    "status": "Alterado",
+    "analise_ia": "Valores entre 93% e 97%, com média de 94,74%; há leituras abaixo do esperado para muitos adultos, embora a interpretação dependa de altitude, condições clínicas e qualidade do sensor. Considerando também a frequência respiratória elevada, é indicada avaliação urgente."
+  },
+  {
+    "sinal_vital": "NBPs",
+    "status": "Não Conclusivo",
+    "analise_ia": "Não há medições disponíveis para analisar este sinal vital."
+  },
+  {
+    "sinal_vital": "NBPd",
+    "status": "Não Conclusivo",
+    "analise_ia": "Não há medições disponíveis para analisar este sinal vital."
+  },
+  {
+    "sinal_vital": "PULSE",
+    "status": "Alterado",
+    "analise_ia": "Pulso periférico entre 144 e 156 bpm, com média de 149,53, muito elevado se a medição estiver correta e compatível com a frequência cardíaca informada. Requer avaliação urgente."
+  },
+  {
+    "sinal_vital": "RESP",
+    "status": "Alterado",
+    "analise_ia": "Frequência respiratória entre 27 e 85 rpm, com média de 57,93, muito acima do esperado para uma adulta se as medições forem confiáveis. Pode indicar risco imediato; procure atendimento de emergência. A ampla variação também pode refletir erro de medição, mas não deve ser ignorada."
+  }
+]
