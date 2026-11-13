@@ -1,0 +1,111 @@
+{
+  "dados_do_paciente": {
+    "id": "3000190n",
+    "nome": "Carlos Alberto Lima",
+    "idade": 55,
+    "sexo": "Masculino",
+    "data": "2026-11-13T22:14:17+00:00"
+  },
+  "prontuario": "paciente com histórico de hipertensão e diabetes. Faz uso diário de Glifage e ARA II",
+  "tempo_analisado": {
+    "inicio_segundo": 0.0,
+    "fim_ultimo_sample_segundo": 599.0,
+    "duracao_segundos": 600.0,
+    "duracao_formatada": "10 minuto(s)",
+    "intervalo_amostragem_segundos": 1.0,
+    "observacao": "Duração calculada pelo intervalo entre o primeiro e o último registro, acrescido de um intervalo de amostragem."
+  },
+  "sinais_vitais": {
+    "HR": {
+      "descricao": "Frequência cardíaca",
+      "coluna_csv": "HR",
+      "unidade": "bpm",
+      "fonte": "https://medlineplus.gov/ency/article/003399.htm",
+      "estatisticas": {
+        "quantidade": 564,
+        "minimo": 102.0,
+        "maximo": 117.0,
+        "media": 107.27,
+        "mediana": 107.0
+      },
+      "status": "Alterado",
+      "analise_ia": "Frequência cardíaca média de 107,27 bpm (mínimo 102; máximo 117), acima do intervalo usual de repouso em adultos. A elevação persistente merece avaliação profissional; faltam informações sobre atividade, repouso e sintomas para interpretar melhor."
+    },
+    "SpO2": {
+      "descricao": "Saturação de oxigênio",
+      "coluna_csv": "SpO2",
+      "unidade": "%",
+      "fonte": "https://medlineplus.gov/lab-tests/pulse-oximetry/",
+      "estatisticas": {
+        "quantidade": 419,
+        "minimo": 97.0,
+        "maximo": 100.0,
+        "media": 99.9,
+        "mediana": 100.0
+      },
+      "status": "Normal",
+      "analise_ia": "Valores entre 97% e 100% são compatíveis com saturação preservada. A interpretação pode variar conforme a qualidade da medição e o contexto clínico."
+    },
+    "NBPs": {
+      "descricao": "Pressão arterial sistólica",
+      "coluna_csv": "NBP Sys",
+      "unidade": "mmHg",
+      "fonte": "https://my.clevelandclinic.org/health/articles/10881-vital-signs",
+      "estatisticas": {
+        "quantidade": 194,
+        "minimo": 176.0,
+        "maximo": 176.0,
+        "media": 176.0,
+        "mediana": 176.0
+      },
+      "status": "Alterado",
+      "analise_ia": "Pressão sistólica registrada como 176 mmHg em todas as 194 medições, valor muito elevado e relevante especialmente no contexto de hipertensão e diabetes. Recomenda-se avaliação profissional urgente para confirmar e avaliar; não há dados de sintomas ou técnica de medição."
+    },
+    "NBPd": {
+      "descricao": "Pressão arterial diastólica",
+      "coluna_csv": "NBP Dias",
+      "unidade": "mmHg",
+      "fonte": "https://my.clevelandclinic.org/health/articles/10881-vital-signs",
+      "estatisticas": {
+        "quantidade": 194,
+        "minimo": 96.0,
+        "maximo": 96.0,
+        "media": 96.0,
+        "mediana": 96.0
+      },
+      "status": "Alterado",
+      "analise_ia": "Pressão diastólica de 96 mmHg em todas as 194 medições, acima do desejável. Junto à sistólica de 176 mmHg, requer avaliação profissional urgente e confirmação da medição."
+    },
+    "PULSE": {
+      "descricao": "Frequência de pulso periférico",
+      "coluna_csv": "PULSE",
+      "unidade": "bpm",
+      "fonte": "https://medlineplus.gov/ency/article/003399.htm",
+      "estatisticas": {
+        "quantidade": 419,
+        "minimo": 87.0,
+        "maximo": 117.0,
+        "media": 105.55,
+        "mediana": 106.0
+      },
+      "status": "Alterado",
+      "analise_ia": "Pulso periférico médio de 105,55 bpm (87–117), com valores frequentemente elevados. Pode refletir taquicardia, mas faltam dados sobre repouso, atividade e sintomas; merece avaliação profissional, sobretudo junto à frequência cardíaca elevada."
+    },
+    "RESP": {
+      "descricao": "Frequência respiratória",
+      "coluna_csv": "RESP",
+      "unidade": "rpm",
+      "fonte": "https://my.clevelandclinic.org/health/articles/10881-vital-signs",
+      "estatisticas": {
+        "quantidade": 559,
+        "minimo": 15.0,
+        "maximo": 26.0,
+        "media": 19.33,
+        "mediana": 19.0
+      },
+      "status": "Alterado",
+      "analise_ia": "Média de 19,33 rpm, dentro da faixa usual para adultos, mas o máximo de 26 rpm indica possíveis episódios de frequência respiratória elevada. Sem horários, sintomas ou contexto, não é possível determinar sua duração ou significado; procure avaliação se persistir ou vier acompanhada de falta de ar."
+    }
+  },
+  "criterio_de_interpretacao": "O relatório contém estatísticas dos valores numéricos disponíveis e uma análise informativa gerada por IA. Essa análise não é diagnóstico nem substitui avaliação profissional."
+}

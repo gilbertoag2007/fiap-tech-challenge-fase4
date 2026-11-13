@@ -1,0 +1,32 @@
+[
+  {
+    "sinal_vital": "HR",
+    "status": "Alterado",
+    "analise_ia": "Frequência cardíaca média de 106,6 bpm (103–110), elevada para uma pessoa adulta em repouso. O salbutamol pode aumentar a frequência cardíaca, mas os dados não permitem determinar a causa. Recomenda-se avaliação profissional, sobretudo se persistente ou acompanhada de sintomas."
+  },
+  {
+    "sinal_vital": "SpO2",
+    "status": "Alterado",
+    "analise_ia": "Média de 95,5% e mediana de 96%, mas houve leituras até 91%, que podem indicar oxigenação baixa ou erro de medição. Como são estatísticas agregadas, não se sabe o valor atual nem as condições da leitura. Uma leitura atual repetida de 91% ou menor, ou dificuldade para respirar, requer avaliação urgente."
+  },
+  {
+    "sinal_vital": "NBPs",
+    "status": "Normal",
+    "analise_ia": "Pressão sistólica de 118 mmHg em todas as 455 medições, valor geralmente dentro da faixa esperada para adultos. A interpretação da pressão arterial completa depende também da diastólica e do contexto clínico."
+  },
+  {
+    "sinal_vital": "NBPd",
+    "status": "Alterado",
+    "analise_ia": "Pressão diastólica de 43 mmHg em todas as 455 medições, abaixo do habitual para adultos. Uma leitura isolada ou problema de medição pode influenciar o resultado, mas a repetição justifica confirmação e avaliação profissional, especialmente se houver tontura, fraqueza ou desmaio."
+  },
+  {
+    "sinal_vital": "PULSE",
+    "status": "Alterado",
+    "analise_ia": "Pulso periférico médio de 106,6 bpm (102–110), elevado para repouso em adultos e semelhante à frequência cardíaca informada. O salbutamol pode contribuir, mas não é possível estabelecer a causa apenas com estes dados. Recomenda-se avaliação profissional se persistente."
+  },
+  {
+    "sinal_vital": "RESP",
+    "status": "Alterado",
+    "analise_ia": "Frequência respiratória média de 20,7 rpm, mediana de 21 e máximo de 44. A média e a mediana estão ligeiramente acima do limite superior usual em repouso para adultos, e o máximo é elevado; atividade, sintomas e condições de medição não foram informados. Se a respiração acelerada estiver presente agora, especialmente com dificuldade para respirar ou baixa saturação, procure atendimento urgente."
+  }
+]

@@ -42,9 +42,9 @@ Os voluntários do REHAB24-6 e os registros do PhysioNet são fontes independent
 - Python **3.12** para o ambiente integrado de vídeo; Python 3.10+ é declarado para a base de sinais isolada.
 - Conexão de rede para preparar os vídeos do Zenodo e usar PhysioNet/OpenAI. A página de sinais também carrega bibliotecas de CDN.
 - Espaço para baixar o ZIP de vídeos (~2,5 GB), extrair os vídeos selecionados (~1,7 GB), instalar dependências e criar caches. CPU funciona para vídeo; MPS/CUDA são opcionais.
-- Uma chave OpenAI configurada em `analise-medica-api/.env` **somente** para executar o POST de importação/análise de sinais vitais. A consulta de relatórios existentes e o módulo de vídeo não exigem essa chave.
+- Uma chave OpenAI configurada em `.env` **somente** para executar o POST de importação/análise de sinais vitais. A consulta de relatórios existentes e o módulo de vídeo não exigem essa chave.
 
-### API integrada
+### Instalação manual — API integrada
 
 A partir da raiz do repositório, em um terminal POSIX:
 
@@ -70,9 +70,55 @@ python3 -m http.server 5500 --bind 127.0.0.1 --directory analise-medica-frontend
 
 Abra `http://127.0.0.1:5500/`, `/pages/sinais-vitais.html` ou `/pages/fisioterapia.html`. A URL da API está em `analise-medica-frontend/assets/js/config.js`; as origens HTTP(S) locais `localhost`/`127.0.0.1` são aceitas pelo CORS. Use um processo Uvicorn para a fila local de vídeo.
 
+### Instalação com Docker Compose
+
+Como alternativa à instalação manual, use Docker Engine com Compose v2.24+ (ou Docker Desktop com integração WSL). Execute na raiz do projeto; Python e Nginx são instalados nas imagens. Pare os servidores manuais se estiverem usando as portas 5500 e 8000.
+
+```sh
+docker compose up -d --build
+```
+
+O Compose executa três serviços em sequência:
+
+1. **`dataset-init`**: baixa e verifica os arquivos do REHAB24-6, extrai Ex1–Ex4 e cria o catálogo. Na primeira execução, baixa aproximadamente 2,5 GB; nas seguintes, reutiliza downloads válidos, ainda consultando o Zenodo para conferir metadados.
+2. **`backend`**: inicia FastAPI com as dependências de vídeo em CPU e um worker, após a preparação concluir com sucesso.
+3. **`frontend`**: inicia Nginx depois que a API estiver saudável, servindo a interface e encaminhando `/v1/` para o backend.
+
+A primeira inicialização pode demorar pelo build e pelo download. Acompanhe em outro terminal:
+
+```sh
+docker compose logs -f dataset-init
+docker compose ps -a
+```
+
+`dataset-init` com estado `Exited (0)` indica conclusão bem-sucedida. Se falhar, consulte os logs e execute `docker compose up -d` após resolver a causa. Não rode `prepare` manualmente ao mesmo tempo que o init. O comando não exibe percentual de download; para acompanhar o tamanho dos arquivos no WSL/Linux:
+
+```sh
+watch -n 5 'du -sh analise-medica-api/data/fisioterapia/downloads analise-medica-api/data/fisioterapia/videos 2>/dev/null'
+```
+
+Após a inicialização, abra:
+
+- Plataforma: [http://localhost:5500](http://localhost:5500).
+- Vídeo: [http://localhost:5500/pages/fisioterapia.html](http://localhost:5500/pages/fisioterapia.html).
+- Sinais vitais: [http://localhost:5500/pages/sinais-vitais.html](http://localhost:5500/pages/sinais-vitais.html).
+- Swagger: [http://localhost:8000/docs](http://localhost:8000/docs).
+
+A pasta `analise-medica-api/data` é compartilhada com os containers: vídeos, modelos, relatórios e caches persistem após `docker compose down`. Os pesos e classificadores versionados são reutilizados; não há treino automático. Excluir vídeos e o ZIP dessa pasta faz a próxima preparação baixá-los novamente.
+
+O arquivo opcional `.env` é lido pelo Compose e não é incluído na imagem. Configure a chave OpenAI conforme a seção abaixo somente para importar/analisar sinais. Depois de alterar esse arquivo, recrie o backend com `docker compose up -d --force-recreate backend`. Um `runtime.json` de outro ambiente deve usar `cpu`, pois MPS não está disponível nesses containers Linux.
+
+Para desligar os serviços:
+
+```sh
+docker compose down
+```
+
+Consulte também o [guia Docker](docs/docker-compose.md). O fluxo de instalação manual acima continua disponível.
+
 ## Preparar sinais vitais
 
-Copie `analise-medica-api/.env.example` para `analise-medica-api/.env`, preencha `OPENAI_API_KEY` e confira `OPENAI_MODEL` e `OPENAI_BASE_URL` disponíveis na sua conta. **Não envie o `.env` ao Git.** O código exige a chave no POST de importação e pode fazer uma chamada paga ao serviço configurado.
+Na raiz do projeto, copie `.env.example` para `.env`, preencha `OPENAI_API_KEY` e confira `OPENAI_MODEL` e `OPENAI_BASE_URL` disponíveis na sua conta. **Não envie o `.env` ao Git.** O código exige a chave no POST de importação e pode fazer uma chamada paga ao serviço configurado.
 
 O catálogo versionado `data/pacientes.json` associa cadastros locais a IDs/diretórios WFDB. A tela de sinais **consulta** CSVs e relatórios já gerados: ela não executa a importação. Para gerar um relatório, com API e credenciais prontos:
 

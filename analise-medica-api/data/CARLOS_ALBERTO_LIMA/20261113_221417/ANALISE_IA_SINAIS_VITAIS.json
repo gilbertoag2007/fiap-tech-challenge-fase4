@@ -1,0 +1,32 @@
+[
+  {
+    "sinal_vital": "HR",
+    "status": "Alterado",
+    "analise_ia": "Frequência cardíaca média de 107,27 bpm (mínimo 102; máximo 117), acima do intervalo usual de repouso em adultos. A elevação persistente merece avaliação profissional; faltam informações sobre atividade, repouso e sintomas para interpretar melhor."
+  },
+  {
+    "sinal_vital": "SpO2",
+    "status": "Normal",
+    "analise_ia": "Valores entre 97% e 100% são compatíveis com saturação preservada. A interpretação pode variar conforme a qualidade da medição e o contexto clínico."
+  },
+  {
+    "sinal_vital": "NBPs",
+    "status": "Alterado",
+    "analise_ia": "Pressão sistólica registrada como 176 mmHg em todas as 194 medições, valor muito elevado e relevante especialmente no contexto de hipertensão e diabetes. Recomenda-se avaliação profissional urgente para confirmar e avaliar; não há dados de sintomas ou técnica de medição."
+  },
+  {
+    "sinal_vital": "NBPd",
+    "status": "Alterado",
+    "analise_ia": "Pressão diastólica de 96 mmHg em todas as 194 medições, acima do desejável. Junto à sistólica de 176 mmHg, requer avaliação profissional urgente e confirmação da medição."
+  },
+  {
+    "sinal_vital": "PULSE",
+    "status": "Alterado",
+    "analise_ia": "Pulso periférico médio de 105,55 bpm (87–117), com valores frequentemente elevados. Pode refletir taquicardia, mas faltam dados sobre repouso, atividade e sintomas; merece avaliação profissional, sobretudo junto à frequência cardíaca elevada."
+  },
+  {
+    "sinal_vital": "RESP",
+    "status": "Alterado",
+    "analise_ia": "Média de 19,33 rpm, dentro da faixa usual para adultos, mas o máximo de 26 rpm indica possíveis episódios de frequência respiratória elevada. Sem horários, sintomas ou contexto, não é possível determinar sua duração ou significado; procure avaliação se persistir ou vier acompanhada de falta de ar."
+  }
+]

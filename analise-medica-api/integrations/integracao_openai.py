@@ -36,7 +36,7 @@ class ErroAnaliseIA(Exception):
 
 class IntegracaoOpenAI:
     def __init__(self) -> None:
-        caminho_env = Path(__file__).resolve().parents[1] / ".env"
+        caminho_env = Path(__file__).resolve().parents[2] / ".env"
         load_dotenv(dotenv_path=caminho_env, override=False)
         self.api_key = os.getenv("OPENAI_API_KEY", "").strip()
         self.modelo = os.getenv("OPENAI_MODEL", "gpt-6-luna").strip()
@@ -48,15 +48,15 @@ class IntegracaoOpenAI:
     def verificar_configuracao(self) -> None:
         if not self.api_key:
             raise ErroConfiguracaoAnaliseIA(
-                "Configure OPENAI_API_KEY no arquivo .env da API."
+                "Configure OPENAI_API_KEY no arquivo .env da raiz do projeto."
             )
         if not self.modelo:
             raise ErroConfiguracaoAnaliseIA(
-                "Configure OPENAI_MODEL no arquivo .env da API."
+                "Configure OPENAI_MODEL no arquivo .env da raiz do projeto."
             )
         if not self.base_url:
             raise ErroConfiguracaoAnaliseIA(
-                "Configure OPENAI_BASE_URL no arquivo .env da API."
+                "Configure OPENAI_BASE_URL no arquivo .env da raiz do projeto."
             )
 
     @staticmethod

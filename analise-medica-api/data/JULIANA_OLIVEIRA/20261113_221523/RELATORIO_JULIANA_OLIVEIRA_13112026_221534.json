@@ -1,0 +1,99 @@
+{
+  "dados_do_paciente": {
+    "id": "3141595n",
+    "nome": "Juliana Oliveira",
+    "idade": 45,
+    "sexo": "Feminino",
+    "data": "2026-11-13T22:15:23+00:00"
+  },
+  "prontuario": "paciente com histórico de hipertensão. Faz uso diário de Captopril",
+  "tempo_analisado": {
+    "inicio_segundo": 0.0,
+    "fim_ultimo_sample_segundo": 599.0,
+    "duracao_segundos": 600.0,
+    "duracao_formatada": "10 minuto(s)",
+    "intervalo_amostragem_segundos": 1.0,
+    "observacao": "Duração calculada pelo intervalo entre o primeiro e o último registro, acrescido de um intervalo de amostragem."
+  },
+  "sinais_vitais": {
+    "HR": {
+      "descricao": "Frequência cardíaca",
+      "coluna_csv": "HR",
+      "unidade": "bpm",
+      "fonte": "https://medlineplus.gov/ency/article/003399.htm",
+      "estatisticas": {
+        "quantidade": 600,
+        "minimo": 137.0,
+        "maximo": 158.0,
+        "media": 149.98,
+        "mediana": 150.0
+      },
+      "status": "Alterado",
+      "analise_ia": "Frequência cardíaca entre 137 e 158 bpm, com média de 149,98, muito elevada para uma adulta se as medições forem confiáveis. Pode representar risco importante e requer avaliação urgente; procure atendimento de emergência, especialmente se houver mal-estar, dor no peito, falta de ar ou desmaio."
+    },
+    "SpO2": {
+      "descricao": "Saturação de oxigênio",
+      "coluna_csv": "SpO2",
+      "unidade": "%",
+      "fonte": "https://medlineplus.gov/lab-tests/pulse-oximetry/",
+      "estatisticas": {
+        "quantidade": 600,
+        "minimo": 93.0,
+        "maximo": 97.0,
+        "media": 94.74,
+        "mediana": 95.0
+      },
+      "status": "Alterado",
+      "analise_ia": "Valores entre 93% e 97%, com média de 94,74%; há leituras abaixo do esperado para muitos adultos, embora a interpretação dependa de altitude, condições clínicas e qualidade do sensor. Considerando também a frequência respiratória elevada, é indicada avaliação urgente."
+    },
+    "NBPs": {
+      "descricao": "Pressão arterial sistólica",
+      "coluna_csv": "NBP Sys",
+      "unidade": "mmHg",
+      "fonte": "https://my.clevelandclinic.org/health/articles/10881-vital-signs",
+      "estatisticas": null,
+      "status": "Não Conclusivo",
+      "analise_ia": "Não há medições disponíveis para analisar este sinal vital."
+    },
+    "NBPd": {
+      "descricao": "Pressão arterial diastólica",
+      "coluna_csv": "NBP Dias",
+      "unidade": "mmHg",
+      "fonte": "https://my.clevelandclinic.org/health/articles/10881-vital-signs",
+      "estatisticas": null,
+      "status": "Não Conclusivo",
+      "analise_ia": "Não há medições disponíveis para analisar este sinal vital."
+    },
+    "PULSE": {
+      "descricao": "Frequência de pulso periférico",
+      "coluna_csv": "PULSE",
+      "unidade": "bpm",
+      "fonte": "https://medlineplus.gov/ency/article/003399.htm",
+      "estatisticas": {
+        "quantidade": 600,
+        "minimo": 144.0,
+        "maximo": 156.0,
+        "media": 149.53,
+        "mediana": 150.0
+      },
+      "status": "Alterado",
+      "analise_ia": "Pulso periférico entre 144 e 156 bpm, com média de 149,53, muito elevado se a medição estiver correta e compatível com a frequência cardíaca informada. Requer avaliação urgente."
+    },
+    "RESP": {
+      "descricao": "Frequência respiratória",
+      "coluna_csv": "RESP",
+      "unidade": "rpm",
+      "fonte": "https://my.clevelandclinic.org/health/articles/10881-vital-signs",
+      "estatisticas": {
+        "quantidade": 600,
+        "minimo": 27.0,
+        "maximo": 85.0,
+        "media": 57.93,
+        "mediana": 57.0
+      },
+      "status": "Alterado",
+      "analise_ia": "Frequência respiratória entre 27 e 85 rpm, com média de 57,93, muito acima do esperado para uma adulta se as medições forem confiáveis. Pode indicar risco imediato; procure atendimento de emergência. A ampla variação também pode refletir erro de medição, mas não deve ser ignorada."
+    }
+  },
+  "criterio_de_interpretacao": "O relatório contém estatísticas dos valores numéricos disponíveis e uma análise informativa gerada por IA. Essa análise não é diagnóstico nem substitui avaliação profissional."
+}

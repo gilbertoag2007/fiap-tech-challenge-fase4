@@ -1,0 +1,5 @@
+*
+!analise-medica-frontend/
+!analise-medica-frontend/**
+!docker/
+!docker/**
