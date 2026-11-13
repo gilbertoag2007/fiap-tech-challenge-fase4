@@ -44,9 +44,17 @@ modelos, relatórios e caches existentes são reaproveitados e persistem após
 remover containers. Os pesos e classificadores versionados devem estar presentes.
 Dados e credenciais não são copiados para as imagens.
 
-O Compose lê opcionalmente analise-medica-api/.env. A chave OpenAI é necessária
+O Compose lê opcionalmente .env. A chave OpenAI é necessária
 somente para importar/analisar sinais, não para iniciar os serviços ou usar vídeo.
 Recrie o backend após mudar esse arquivo: docker compose up -d --force-recreate backend.
+
+Para configurar, copie `.env.example` para `.env` na raiz do repositório.
+Na instalação manual, a API encontra esse mesmo arquivo pelo caminho do código,
+independentemente da pasta de execução. Variáveis já definidas no ambiente têm
+prioridade sobre o arquivo. No Docker, o Compose injeta os valores no backend;
+não é necessário montar ou copiar o arquivo para dentro da imagem.
+Se usava `analise-medica-api/.env`, transfira seus valores para o `.env` da raiz:
+o caminho antigo deixou de ser lido. Não há migração automática de credenciais.
 
 A preparação é automática. Para conferir os modelos após a inicialização:
 
