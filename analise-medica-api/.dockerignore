@@ -1,0 +1,15 @@
+*
+!Dockerfile
+!requirements.txt
+!requirements-video.txt
+!main.py
+!controller/
+!controller/**
+!services/
+!services/**
+!integrations/
+!integrations/**
+!fisioterapia/
+!fisioterapia/**
+**/__pycache__/
+**/*.pyc
