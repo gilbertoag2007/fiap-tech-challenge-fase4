@@ -3,3 +3,8 @@ playwright-output/
 node_modules/
 __pycache__/
 .pytest_cache/
+
+# Local credentials
+.env
+.env.*
+!.env.example

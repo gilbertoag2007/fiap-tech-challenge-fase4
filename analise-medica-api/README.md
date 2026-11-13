@@ -192,7 +192,7 @@ Casos de erro:
 
 ## Análise com OpenAI
 
-Antes de usar a rota de importação, configure o arquivo `.env` na pasta `analise-medica-api` com as variáveis:
+Antes de usar a rota de importação, copie `.env.example` para `.env` na raiz do repositório e configure o arquivo com as variáveis:
 
 ```env
 OPENAI_API_KEY=sua_chave
