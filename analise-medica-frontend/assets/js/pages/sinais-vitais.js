@@ -139,7 +139,7 @@
       const analysisTitle = document.createElement("h4");
       analysisTitle.className = "chart-result-analysis-title";
       analysisTitle.textContent =
-        "Resultado da Análise (Analisado com Inteligência Artificial)";
+        window.DEMO_MODE ? "Resultado ilustrativo (dados sintéticos, sem IA)" : "Resultado da Análise (Analisado com Inteligência Artificial)";
       const observation = document.createElement("p");
       observation.className = "chart-result-observation";
       observation.textContent = analysisText;

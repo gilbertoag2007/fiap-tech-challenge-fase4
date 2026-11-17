@@ -1,0 +1,29 @@
+# Optional Blueprint. Manual UI deployment uses these same commands.
+services:
+  - type: web
+    name: fiap-fase4-api-demo
+    runtime: python
+    plan: free
+    branch: codex/render-free-demo
+    rootDir: analise-medica-api
+    buildCommand: pip install -r requirements-render.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT --workers 1
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.8
+      - key: DEMO_MODE
+        value: '1'
+      - key: FRONTEND_ORIGINS
+        sync: false
+  - type: web
+    name: fiap-fase4-demo
+    runtime: static
+    branch: codex/render-free-demo
+    buildCommand: python3 scripts/build-render-frontend.py
+    staticPublishPath: dist/frontend
+    envVars:
+      - key: API_BASE_URL
+        sync: false
+      - key: DEMO_MODE
+        value: '1'

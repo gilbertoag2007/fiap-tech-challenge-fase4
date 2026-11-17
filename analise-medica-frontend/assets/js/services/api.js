@@ -10,7 +10,7 @@
 
   const http = window.axios.create({
     baseURL: window.API_BASE_URL,
-    timeout: 10000,
+    timeout: window.API_TIMEOUT || 10000,
     headers: {
       Accept: "application/json",
     },

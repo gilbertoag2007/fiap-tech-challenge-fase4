@@ -4,7 +4,7 @@
     const response = await fetch(new URL(endpoint, window.API_BASE_URL), {
       ...options,
       headers: { Accept: 'application/json', ...(options.body ? { 'Content-Type': 'application/json' } : {}) },
-      signal: AbortSignal.timeout(10000),
+      signal: AbortSignal.timeout(window.API_TIMEOUT || 10000),
     });
     if (!response.ok) {
       let detail = 'Não foi possível consultar a análise.';

@@ -55,6 +55,13 @@
     const video = selectedVideo();
     analyze.disabled = !video;
     if (!video) { player.removeAttribute('src'); player.load(); status('Nenhuma gravação disponível.'); return; }
+    if (catalog.demo) {
+      player.removeAttribute('src'); player.hidden = true; overlay.hidden = true;
+      byId('video-caption').textContent = 'Resultados sintéticos; vídeo real indisponível nesta demonstração.';
+      analyze.textContent = 'Explorar resultado simulado';
+      status('Exemplo pronto. Nenhum vídeo será processado.');
+      return;
+    }
     player.src = service.videoUrl(video.id);
     byId('video-caption').textContent = 'Participante ' + video.person_id + ' · Câmera ' + video.camera;
     status('Gravação pronta para análise.');
@@ -179,7 +186,7 @@
       if (task.status === 'concluido') {
         const result = await service.report(task.id);
         if (ownRevision !== revision) return;
-        renderReport(result); progress.value = 100; status('Análise concluída. Selecione uma repetição para explorar o movimento.');
+        renderReport(result); progress.value = 100; status(result.demo ? 'Resultado simulado carregado. Selecione uma repetição para explorar as curvas ilustrativas.' : 'Análise concluída. Selecione uma repetição para explorar o movimento.');
         analyze.disabled = false;
         try {
           const points = await service.pose(task.id);

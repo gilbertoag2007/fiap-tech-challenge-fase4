@@ -4,6 +4,10 @@ Projeto acadêmico com duas frentes implementadas: consulta e análise descritiv
 
 Leia o [relatório técnico completo](docs/relatorio-tecnico-fase4.md) ([PDF](docs/relatorio-tecnico-fase4.pdf)) para arquitetura, métodos, resultados, rastreabilidade ao enunciado e limites. Os [resultados detalhados de vídeo](docs/fisioterapia/resultados.md) incluem matrizes de confusão e cobertura.
 
+## Demonstração gratuita
+
+A branch `codex/render-free-demo` inclui uma [versão demonstrativa para Render](docs/render-demo.md), com frontend estático e API leve usando apenas dados sintéticos. O modo demonstrativo não executa inferência clínica nem processamento real de vídeo.
+
 ## O que funciona hoje
 
 | Área | Implementação | Estado da validação |
